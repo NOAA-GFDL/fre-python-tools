@@ -43,5 +43,5 @@ fre-python-tools repository. From an already installed miniconda installation,
 create the conda environment with:
 
 ```
-conda install --file environment.yml
+conda env create --file environment.yml
 ```
