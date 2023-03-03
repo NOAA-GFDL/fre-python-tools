@@ -1,3 +1,10 @@
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+# pytest recommends this for new projects
+# https://docs.pytest.org/en/7.2.x/explanation/goodpractices.html#test-discovery
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
