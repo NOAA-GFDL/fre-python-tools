@@ -2,7 +2,7 @@ name: fre-python-tools
 channels:
   - defaults
 dependencies:
-  - yaml
+  - cmor
   - pip
   - pip:
     -  git+https://github.com/NOAA-GFDL/fre-python-tools.git
