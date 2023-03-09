@@ -1,6 +1,6 @@
 name: fre-python-tools
 channels:
-  - defaults
+  - conda-forge
 dependencies:
   - cmor
   - pip
