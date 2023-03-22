@@ -23,9 +23,11 @@ def generate_time_averages(targdir=None, targfile=None, outfile=None, debugMode=
     #
     #    print(cdo.sinfov(targdir+targfile))
 
-    targoutpath=targdir+outfile
+    #targoutpath=targdir+outfile
+    targoutpath=outfile
+
     #nc_fout = nc.Dataset( './'+outfile, 'w',persist=True)
-    0cdo.timavg(input=targpath, output=targoutpath,options='-f nc', returnCdf=True)
+    cdo.timavg(input=targpath, output=targoutpath, returnCdf=True)
     #print(stuff)
     #nc_fout.close()
     
@@ -50,11 +52,16 @@ def main():
     #if debugMode: print("calling generate time averages for file: " + targdir + targfile)
     #generate_time_averages(targdir,targfile,'test_cdo_pypi_1.nc',debugMode)
 
-    targdir='./'    
-    #targdir ='/archive/Ciheim.Brown/am5/2022.01/c96L33_am5f1a0r0_amip/gfdl.ncrc4-intel21-prod-openmp/pp/atmos/ts/monthly/5yr/'
+    #targdir='./'    
+    targdir ='/archive/Ciheim.Brown/am5/2022.01/c96L33_am5f1a0r0_amip/gfdl.ncrc4-intel21-prod-openmp/pp/atmos/ts/monthly/5yr/'
+
     targfile='atmos.197901-198312.droplets.nc'
     if debugMode: print("calling generate time averages for file: " + targdir + targfile)
     generate_time_averages(targdir,targfile,'test_cdo_pypi_1.nc',debugMode)    
+
+    targfile='atmos.198401-198812.droplets.nc'
+    if debugMode: print("calling generate time averages for file: " + targdir + targfile)
+    generate_time_averages(targdir,targfile,'test_cdo_pypi_2.nc',debugMode)    
     
     #if debugMode: print("done with analyze_gcplog")
 
