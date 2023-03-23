@@ -26,32 +26,32 @@ function cdo_timavg_ex(){
 	return
 }
 
-# is this the same as `cdo timavg` ? if so, why does it exist?
-# looks like a separate function call from what i can tell,
-# e.g. not an alias to `timavg`
-#cdo timmean
-function cdo_timmean_ex(){
-	module load cdo
+## is this the same as `cdo timavg` ? if so, why does it exist?
+## looks like a separate function call from what i can tell,
+## e.g. not an alias to `timavg` --> WRONG it is an alias
+##cdo timmean
+#function cdo_timmean_ex(){
+#	module load cdo
+#
+#	if [ -f cdo_timmean_test1979_5y.nc ] ; then rm cdo_timmean_test1979_5y.nc ; fi
+#	cdo timmean $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_timmean_${PP_COMP}_${VAR}_test1979_5y.nc
+#	
+#	if [ -f cdo_timmean_test1984_5y.nc ] ; then rm cdo_timmean_test1984_5y.nc ; fi										 
+#	cdo timmean $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_timmean_${PP_COMP}_${VAR}_test1984_5y.nc
+#
+#	return
+#}
 
-	if [ -f cdo_timmean_test1979_5y.nc ] ; then rm cdo_timmean_test1979_5y.nc ; fi
-	cdo timmean $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_timmean_${PP_COMP}_${VAR}_test1979_5y.nc
-	
-	if [ -f cdo_timmean_test1984_5y.nc ] ; then rm cdo_timmean_test1984_5y.nc ; fi										 
-	cdo timmean $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_timmean_${PP_COMP}_${VAR}_test1984_5y.nc
 
-	return
-}
-
-
-function nco_ncclimo_ex(){
-	module load nco
-
-	ncclimo
-
-	# ????
-
-	return
-}
+#function nco_ncclimo_ex(){
+#	module load nco
+#
+#	ncclimo
+#
+#	# ????
+#
+#	return
+#}
 
 
 

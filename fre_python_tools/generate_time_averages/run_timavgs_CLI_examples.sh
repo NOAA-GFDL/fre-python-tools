@@ -6,10 +6,12 @@
 # that seems to average files sensibly.
 
 # then, we're gonna figure out how to intelligently structure it in python.
-TARGETDIR=/archive/Ciheim.Brown/am5/2022.01/c96L33_am5f1a0r0_amip/gfdl.ncrc4-intel21-prod-openmp/pp/atmos/ts/monthly/5yr
+#TARGETDIR=/archive/Ciheim.Brown/am5/2022.01/c96L33_am5f1a0r0_amip/gfdl.ncrc4-intel21-prod-openmp/pp/atmos/ts/monthly/5yr
+TARGETDIR=$PWD/testfiles
 PP_COMP=atmos
 #VAR=LWP
 VAR=droplets
+
 echo ""
 echo "__________target files___________"
 ls $TARGETDIR/$PP_COMP.????01-????12.$VAR.nc
