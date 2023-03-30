@@ -4,7 +4,7 @@ Python-based tools and interfaces to be used by FRE workflows
 ## Install with miniconda and pip (recommended)
 Some prerequisites require miniconda, so the current recommendation is to
 install the prerequisites with minconda first, then install fre-python-tools
-via pip. This method has the advantage of pip-installing your local changes.
+via pip. This method has the advantage of installing your local changes.
 
 1. Install dependencies
 
@@ -28,13 +28,13 @@ pytest
 ## Install with miniconda alone
 The miniconda environment.yml file installs the main branch of the
 fre-python-tools repository, so if you do not need to install local changes,
-the second step above can be omitted. i.e.:
+you may use simply:
 
 ```
 conda env create --file environment.yml
 ```
 
-## How to install with pip alone (not generally recommended)
+## Install with pip alone (not generally recommended)
 This method will not install all prerequisites, so is not recommended except for
 purposes where the conda prerequisites are not needed.
 
