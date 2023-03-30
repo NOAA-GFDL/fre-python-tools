@@ -9,8 +9,8 @@
 #TARGETDIR=/archive/Ciheim.Brown/am5/2022.01/c96L33_am5f1a0r0_amip/gfdl.ncrc4-intel21-prod-openmp/pp/atmos/ts/monthly/5yr
 TARGETDIR=$PWD/testfiles
 PP_COMP=atmos
-#VAR=LWP
-VAR=droplets
+VAR=LWP
+#VAR=droplets
 
 echo ""
 echo "__________target files___________"
@@ -18,13 +18,17 @@ ls $TARGETDIR/$PP_COMP.????01-????12.$VAR.nc
 echo "--------------------------------------------------"
 source ./timavgs_CLI_examples.sh
 
-#looks good but maybe not done here?
+##looks good but maybe not done here?
 echo "running timavg.csh examples"
 timavgcsh_ex
 
-#looks good but maybe not done here?
-echo "running cdo timavg examples"
-cdo_timavg_ex
+##looks good but maybe not done here?
+#echo "running local timavg.csh examples"
+#local_timavgcsh_ex
+
+##looks good but maybe not done here?
+#echo "running cdo timavg examples"
+#cdo_timavg_ex
 
 ##looks good but maybe not done here?
 ##WOAH this is much faster than timavg...

@@ -13,6 +13,19 @@ function timavgcsh_ex(){
 	return
 }
 
+#local timavg.csh
+function local_timavgcsh_ex(){
+	module load fre-nctools
+	
+	if [ -f timavgcsh_test1979_5y.nc ] ; then rm timavgcsh_test1979_5y.nc ; fi
+	./timavg.csh -r8 -mb -o ./timavgcsh_${PP_COMP}_${VAR}_test1979_5y.nc $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc
+	
+  	#if [ -f timavgcsh_test1984_5y.nc ] ; then rm timavgcsh_test1984_5y.nc ; fi  
+ 	#./timavg.csh -r8 -mb -o ./timavgcsh_${PP_COMP}_${VAR}_test1984_5y.nc $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc
+
+	return
+}
+
 #cdo timavg
 function cdo_timavg_ex(){
 	module load cdo

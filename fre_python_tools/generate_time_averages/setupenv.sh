@@ -6,27 +6,17 @@
 module load git
 module load python
 #module load ncview
+module load fre-nctools
 
 # ________________________________
 ## default cdo package, v 1.9.10 [can use this or other 1.X.Y versions through python]
 module load cdo
+
 # non-default, cdo v 2.1.0 [no python package for this version yet though]
 #module load cdo/2.1.0
 
-## install cdo package in user conda env
-pip install cdo --user
-
-
-
-
-
-
-
-
-
-
-
-
+### install cdo package in user conda env
+#pip install cdo --user
 
 # ________________________________
 ## default nco package, v 5.0.1
