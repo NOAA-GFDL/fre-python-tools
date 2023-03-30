@@ -11,7 +11,7 @@ def generate_frepythontools_timavg(targdir=None, targfile=None, outfile=None, va
 
     import netCDF4 as nc
     do_weighted_avg=True
-    do_std_dev=True
+    #do_std_dev=True
     
     nc_fin = nc.Dataset((targdir+targfile), "r")
     fin_vars=nc_fin.variables
@@ -31,8 +31,13 @@ def generate_frepythontools_timavg(targdir=None, targfile=None, outfile=None, va
     lat_bnd=fin_dims['lat'].size
     lon_bnd=fin_dims['lon'].size
     #print(val_array[time_bnd-1][lat_bnd-1][lon_bnd-1])
+    print('time_bnds type is: ' + str(type(time_bnds[0][0])))  #numpy.float64
+    print('val_array type is: ' + str(type(val_array[0][0][0]))) #numpy.float32
+    avgvals=[[[0. for lon in range(lon_bnd)] for lat in range(lat_bnd)] for time in range(1)]
+    print('avgvals type is: '+str(type(avgvals[0][0][0])))
+    #assert(False)
 
-    avgvals=[[[0 for lon in range(lon_bnd)] for lat in range(lat_bnd)] for time in range(1)]
+
     for lat in range(lat_bnd):
         for lon in range(lon_bnd):
 
