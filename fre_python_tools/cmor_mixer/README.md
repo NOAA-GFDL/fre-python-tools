@@ -15,21 +15,30 @@ and the published CMIP6 output (processed using fremetar/Curator tool) is here:
 Check-out this CMOR app tool
 
 
-git clone git@gitlab.gfdl.noaa.gov:fre2/apps/cmor.git￼
-cd cmor
+Clone this repository
+Using SSH 
+
+git clone git@github.com:NOAA-GFDL/fre-python-tools.git
+
+or using HTTPS
+
+git clone https://github.com/NOAA-GFDL/fre-python-tools.git
+
+From the cloned repository, navigate to cmor-mixer directory.
+
+E.g.cd fre-python-tools/fre_python_tools/cmor_mixer
 
 Load the PCMDI CMOR package
 
-
 module load conda
+
 conda activate cmor
 
 See command-line usage help
 
+python CMORmixer.py --help 
 
-python cmor_commander.py --help
-
-usage: cmor_commander.py [-h] -d DIR2CMOR -l GFDL_VARS_FILE -r CMOR_TBL_JSON -p CMIP_INPUT_JSON [-o CMIP_OUTPUT]
+usage: CMORmixer [-h] -d DIR2CMOR -l GFDL_VARS_FILE -r CMOR_TBL_JSON -p CMIP_INPUT_JSON [-o CMIP_OUTPUT]
 
 CMORizing all files in directory specified in command line
 
@@ -91,7 +100,7 @@ Run the CMOR tool!
 
 The output location (-o) can be any directory that you can write to.
 
-    python cmor_commander.py \
+    python CMORmixer.py \
         -d /archive/oar.gfdl.cmip6/CM4/warsaw_201710_om4_v1.0.1/CM4_1pctCO2_C/gfdl.ncrc4-intel16-prod-openmp/pp/atmos_cmip/ts/monthly/5yr \
         -l variables.json \
         -r CMIP6_Amon.json \
