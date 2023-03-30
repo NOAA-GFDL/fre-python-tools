@@ -15,7 +15,15 @@ and the published CMIP6 output (processed using fremetar/Curator tool) is here:
 Check-out this CMOR app tool
 
 
-git clone git@gitlab.gfdl.noaa.gov:fre2/apps/cmor.git￼
+Clone this repository
+Using SSH 
+
+git clone git@github.com:NOAA-GFDL/fre-python-tools.git
+
+or using HTTPS
+
+git clone https://github.com/NOAA-GFDL/fre-python-tools.git
+
 cd cmor
 
 Load the PCMDI CMOR package
