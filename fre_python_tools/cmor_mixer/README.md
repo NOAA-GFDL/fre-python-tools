@@ -22,7 +22,7 @@ git clone git@github.com:NOAA-GFDL/fre-python-tools.git
 
 or using HTTPS
 
-https://github.com/NOAA-GFDL/fre-python-tools.git
+git clone https://github.com/NOAA-GFDL/fre-python-tools.git
 
 cd cmor
 
