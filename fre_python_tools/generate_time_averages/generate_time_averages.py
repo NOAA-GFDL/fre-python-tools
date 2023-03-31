@@ -2,6 +2,8 @@
 
 import argparse
 import time
+import numpy
+import math
 #import os, sys
 #import netCDF4 as nc
 
@@ -11,7 +13,9 @@ def generate_frepythontools_timavg(targdir=None, targfile=None, outfile=None, va
 
     import netCDF4 as nc
     do_weighted_avg=True
-    #do_std_dev=True
+    do_std_dev=True # std dev *of the mean*.
+                    # reflects the precision of the mean
+                    # might someone want normal std. dev?
     
     nc_fin = nc.Dataset((targdir+targfile), "r")
     fin_vars=nc_fin.variables
@@ -24,78 +28,87 @@ def generate_frepythontools_timavg(targdir=None, targfile=None, outfile=None, va
         if (str(key)==var):
             val_array=nc_fin[key][:]
             time_bnds=nc_fin['time_bnds'][:]
+            keyFound=True
             break
+    if not keyFound:
+        print('requested variable not found. exit.')
+        return
+    
+    
+    import numpy.ma as ma
+    isMasked = ma.is_masked(val_array)
+    print(f'isMasked={isMasked}')
 
     fin_dims =nc_fin.dimensions
     time_bnd=fin_dims['time'].size
     lat_bnd=fin_dims['lat'].size
     lon_bnd=fin_dims['lon'].size
     #print(val_array[time_bnd-1][lat_bnd-1][lon_bnd-1])
-    print('time_bnds type is: ' + str(type(time_bnds[0][0])))  #numpy.float64
-    print('val_array type is: ' + str(type(val_array[0][0][0]))) #numpy.float32
-    avgvals=[[[0. for lon in range(lon_bnd)] for lat in range(lat_bnd)] for time in range(1)]
-    print('avgvals type is: '+str(type(avgvals[0][0][0])))
-    #assert(False)
 
 
+    # initialize arrays
+    avgvals=[[[numpy.float32(0.) for lon in range(lon_bnd)] for lat in range(lat_bnd)] for time in range(1)]    
+    if do_std_dev:
+        stddevs=[[[numpy.float32(0.) for lon in range(lon_bnd)] for lat in range(lat_bnd)] for time in range(1)]
+
+    print(f'type of val_array={type(val_array)}')
+    print(f'type of avgvals  ={type(avgvals)}')
+    print(f'time_bnds entry type is:  {type(time_bnds[0][0]   )}')  #numpy.float64
+    print(f'val_array entry type is:  {type(val_array[0][0][0])}') #numpy.float32
+    print(f'avgvals entry   type is:  {type(avgvals[0][0][0]  )}')
+
+    # compute average, or (partial) weighted average, for each lat/lon coordinate over time record in file        
     for lat in range(lat_bnd):
         for lon in range(lon_bnd):
 
             if do_weighted_avg:
-                avgvals[0][lat][lon]=sum( 
-                    val_array[time][lat][lon]*(time_bnds[time][1]-time_bnds[time][0]) 
-                    for time in range(time_bnd) ) 
-                time_bnd_sum=sum(
-                    (time_bnds[time][1]-time_bnds[time][0]) for time in range(time_bnd) )
-                
-            else:
-                avgvals[0][lat][lon]=sum( 
-                    val_array[time][lat][lon] for time in range(time_bnd) ) / float(time_bnd)
+                time_bnd_sum=numpy.float32(0.)
+                for time in range(time_bnd): # arranged this way so we don't have two sep sum loops.
+                    avgvals[0][lat][lon]+=numpy.float32(val_array[time][lat][lon])*numpy.float64(time_bnds[time][1]-time_bnds[time][0]) 
+                    time_bnd_sum+= numpy.float32(time_bnds[time][1]-time_bnds[time][0])
+                avgvals[0][lat][lon]/=numpy.float32(time_bnd_sum)
 
-    if do_weighted_avg: 
-        for lat in range(lat_bnd):
-            for lon in range(lon_bnd):
-                avgvals[0][lat][lon]/=time_bnd_sum
-        
+                if do_std_dev:
+                    stddevs[0][lat][lon]=math.sqrt(
+                                                 sum(
+                        (val_array[time][lat][lon]-numpy.float32(avgvals[0][lat][lon])) ** numpy.float32(2.) for time in range(time_bnd)
+                                                    )
+                                                  ) / numpy.float32(time_bnd_sum)
+                                               
+            else: #unweighted average/stddev
+                avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
+                    val_array[time][lat][lon] for time in range(time_bnd)
+                                        ) / numpy.float32(time_bnd)
+
+                if do_std_dev:
+                    stddevs[0][lat][lon]=math.sqrt(
+                                                 sum(
+                                          (val_array[time][lat][lon]-avgvals[0][lat][lon]) ** numpy.float32(2.) for time in range(time_bnd)
+                                                    ) / ( (time_bnd - numpy.float32(1.) ) * time_bnd )
+                                                  )
+    
+
+
     nc_compare=nc.Dataset( ('timavgcsh_atmos_LWP_test1979_5y.nc'), 'r') # for checking the averaging i do against the averaging timavg.csh does
     compare_avgvals=nc_compare[var][:]
 
-    print(
+    if do_std_dev:
+        print(
         f'avgvals[0][0][0]        = \
-        {avgvals[0][0][0]}'
-    )
+        {avgvals[0][0][0]} +/- {stddevs[0][0][0]}'  )
+        print(f'type(stddevs[0][0][0])={type(stddevs[0][0][0])}')
+    else:
+        print(
+        f'avgvals[0][0][0]        = \
+        {avgvals[0][0][0]}'  )
+    print(f'type(avgvals[0][0][0])={type(avgvals[0][0][0])}')
     print(
         f'compare_avgvals[0][0][0]= \
-        {compare_avgvals[0][0][0]}'
-    )
+        {compare_avgvals[0][0][0]}'    )
 
 
-    print(
-        f'avgvals[0][{lat_bnd-1}][{lon_bnd-1}]        =\
-        {avgvals[0][lat_bnd-1][lon_bnd-1]}'
-    )
-
-    print(
-        f'compare_avgvals[0][{lat_bnd-1}][{lon_bnd-1}]=\
-        {compare_avgvals[0][lat_bnd-1][lon_bnd-1]}'
-    )
-
-    #assert(False)
-                
-
-    #avgvals2=[ [ [ ] ] for time in range(1) ] 
-    
-
-                                   
-
-    #assert(False)
     #nc_fout = nc.Dataset( './'+outfile, 'w',persist=True)
     #nc_fout.close()
-
-    
-
-
-    
     return
 
 # must have done something like `module load fre-nctools`
@@ -109,6 +122,17 @@ def generate_frenctools_timavg(targdir=None, targfile=None, outfile=None, debugM
                      stdout=subprocess.PIPE,
                      shell=False)
 
+    return
+
+# under construction
+def generate_nco_timavg(targdir=None, targfile=None, outfile=None, debugMode=False):    
+    if debugMode: print("calling generate_nco_timavg for file: " + targdir + targfile)
+    targpath=targdir+targfile
+    targoutpath=outfile
+    
+    #from nco import ncclimo
+    print('under construction.')
+    
     return
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
@@ -128,6 +152,7 @@ def generate_time_average(pkg=None, targdir=None, targfile=None, outfile=None, d
     if debugMode: print("calling generate time averages")
 
     if   pkg == "cdo"            : generate_cdo_timavg(            targdir, targfile, outfile, debugMode )
+    elif pkg == "nco"            : generate_nco_timavg(            targdir, targfile, outfile, debugMode )
     elif pkg == "fre-nctools"    : generate_frenctools_timavg(     targdir, targfile, outfile, debugMode )
     elif pkg == "fre-pythontools": generate_frepythontools_timavg( targdir, targfile, outfile, 'LWP', debugMode )
     else                         : print('requested package unknown. exit.')
@@ -142,13 +167,13 @@ def main():
     ## argument parser TO DO
     COMP='atmos'
     #VAR='droplets'
-    VAR='LWP'    
-    
+    VAR='LWP'   
 
     targdir='./testfiles/'    
     targfile1=COMP+'.197901-198312.'+VAR+'.nc' 
     targfile2=COMP+'.198401-198812.'+VAR+'.nc'
     
+    # argparsing aspect still under construction
     argparser = argparse.ArgumentParser(
         description="generate time averages for specified set of netCDF files. Example: \
         generate-time-averages.py /path/to/your/files/")
@@ -168,7 +193,7 @@ def main():
     #print(cli_args.inf)
     #print('cli_args={cli_args}')
     
-
+    # the function calls
 
     # ---------------------------------------- cdo timavg calls ---------------------------------------- #
     #generate_time_average( 'cdo', targdir, targfile1, 'test_cdo_pypi_1.nc', debugMode)    
