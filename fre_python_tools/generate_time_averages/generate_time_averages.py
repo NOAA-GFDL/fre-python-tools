@@ -52,39 +52,40 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
 
     # compute average, for each lat/lon coordinate over time record in file
     for lat in range(lat_bnd):
+        print(f'lat # {lat+1} out of {lat_bnd} iters')
         for lon in range(lon_bnd):
 
-            val_array= numpy.reshape( nc_fin[var][:], (0, -1) )[lat][lon]
-            print(val_array)
-            assert(False)
+            val_array= numpy.moveaxis( nc_fin[var][:], 0, -1 )[lat][lon]
+            #print(val_array)
+
             if do_weighted_avg:                
                 time_bnd_sum = sum( (time_bnds[tim][1] - time_bnds[tim][0]) for tim in range(time_bnd))
-                avgvals[0][lat][lon]=sum( val_array[tim][lat][lon] * (
+                avgvals[0][lat][lon]=sum( val_array[tim] * (
                                                       time_bnds[tim][1]-time_bnds[tim][0]
                                                               ) for tim in range(time_bnd) ) / time_bnd_sum
                 if do_std_dev: #std dev *of the mean*. not a vanilla std dev.
                     stddevs[0][lat][lon]=math.sqrt(
                                                  sum(
-                        (val_array[tim][lat][lon]-avgvals[0][lat][lon]) ** 2.
+                        (val_array[tim]-avgvals[0][lat][lon]) ** 2.
                                                      for tim in range(time_bnd)
                                                     )
                                                   ) / time_bnd_sum
 
             else: #unweighted average/stddev
                 avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
-                    val_array[tim][lat][lon] for tim in range(time_bnd)
+                    val_array[tim] for tim in range(time_bnd)
                                         ) / time_bnd
 
                 if do_std_dev:
                     stddevs[0][lat][lon]=math.sqrt(
                                                  sum(
-                                          (val_array[tim][lat][lon]-avgvals[0][lat][lon]) ** 2.
+                                          (val_array[tim]-avgvals[0][lat][lon]) ** 2.
                                                      for tim in range(time_bnd)
                                                     ) / ( (time_bnd - 1. ) * time_bnd )
                                                   )
-
+                    
     #finish_time=time.perf_counter()
-    #print("\n done with important part of generate_frepythontools_timavg")
+    print("\n done with important part of generate_frepythontools_timavg")
     #print(f'Finished the important part in {round(finish_time - start_time , 2)} second(s)')
 
     # for checking the averaging i do against the averaging timavg.csh does
