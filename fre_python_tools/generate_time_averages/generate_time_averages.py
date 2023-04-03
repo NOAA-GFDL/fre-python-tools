@@ -8,9 +8,9 @@ from subprocess import Popen, PIPE
 import numpy
 from numpy import ma
 
-
 from netCDF4 import Dataset
 from cdo import Cdo
+
 
 def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
                                    debug_mode=False, do_weighted_avg=True, do_std_dev=True):
@@ -18,19 +18,12 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
     if debug_mode:
         print("calling generate_frepythontools_timavg for file: " + targpath)
 
-    #print("timing generate_frepythontools_timavg \n")
-    #start_time=time.perf_counter()
-
     nc_fin = Dataset(targpath, "r")
+    
+    # check for the variable we're hoping is in the file
     fin_vars=nc_fin.variables
-
-    ### is a 3-d array.
-    ### val[time][lat][lon]
-    val_array=[]
-    time_bnds=[]
     for key in fin_vars:
         if str(key)==var:
-            val_array=nc_fin[key][:]
             time_bnds=nc_fin['time_bnds'][:]
             key_found=True
             break
@@ -38,42 +31,38 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
         print('requested variable not found. exit.')
         return
 
-    is_masked = ma.is_masked(val_array)
-    print(f'is_masked={is_masked}')
+    # check for mask (will be important for later dev stages)
+    #is_masked = ma.is_masked(val_array)
+    #print(f'is_masked={is_masked}')
 
+    # read in sizes of specific axes
     fin_dims =nc_fin.dimensions
-    time_bnd=fin_dims['time'].size
     lat_bnd=fin_dims['lat'].size
     lon_bnd=fin_dims['lon'].size
-    #print(val_array[time_bnd-1][lat_bnd-1][lon_bnd-1])
-
+    time_bnd=fin_dims['time'].size
+    
     # initialize arrays
-    avgvals=[[[numpy.float32(0.) for lon in range(lon_bnd)] for lat in range(lat_bnd)]
-             for tim in range(1)]
+    avgvals=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
     if do_std_dev:
-        stddevs=[[[numpy.float32(0.) for lon in range(lon_bnd)] for lat in range(lat_bnd)]
-                 for tim in range(1)]
+        stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
 
-    print(f'type of val_array={type(val_array)}')
-    print(f'type of avgvals  ={type(avgvals)}')
-    print(f'time_bnds entry type is:  {type(time_bnds[0][0]   )}')  #numpy.float64
-    print(f'val_array entry type is:  {type(val_array[0][0][0])}') #numpy.float32
-    print(f'avgvals entry   type is:  {type(avgvals[0][0][0]  )}')
+    ### is a 3-d array.
+    ### val[time][lat][lon]
+    #val_array=nc_fin[var][:]
 
     # compute average, for each lat/lon coordinate over time record in file
     for lat in range(lat_bnd):
         for lon in range(lon_bnd):
 
-            if do_weighted_avg:
-                time_bnd_sum=0.
-                for tim in range(time_bnd):
-                    avgvals[0][lat][lon] += val_array[tim][lat][lon] * (
+            val_array= numpy.reshape( nc_fin[var][:], (0, -1) )[lat][lon]
+            print(val_array)
+            assert(False)
+            if do_weighted_avg:                
+                time_bnd_sum = sum( (time_bnds[tim][1] - time_bnds[tim][0]) for tim in range(time_bnd))
+                avgvals[0][lat][lon]=sum( val_array[tim][lat][lon] * (
                                                       time_bnds[tim][1]-time_bnds[tim][0]
-                                                                       )
-                    time_bnd_sum += time_bnds[tim][1] - time_bnds[tim][0]
-                avgvals[0][lat][lon]/=time_bnd_sum
-
-                if do_std_dev:
+                                                              ) for tim in range(time_bnd) ) / time_bnd_sum
+                if do_std_dev: #std dev *of the mean*. not a vanilla std dev.
                     stddevs[0][lat][lon]=math.sqrt(
                                                  sum(
                         (val_array[tim][lat][lon]-avgvals[0][lat][lon]) ** 2.
