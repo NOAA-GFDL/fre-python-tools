@@ -1,4 +1,4 @@
-# cmor-mixer
+# CMORmixer
 Climate Model Output Rewriter is used to produce CF-compliant netCDF files. The structure of the files created by the library and the metadata they contain fulfill the requirements of many of the climate community's standard model experiments.
 CMOR can be considered a general purpose rewriter, agnostic to particular standards such as CMIP6. It accepts an configuration file that describes the output file name, global attributes, variable attributes, dimension names, and more. Example template files are included that adhere roughly to CMIP6 specifications. They may be modified to conform to other specifications.
 In current suite there are 2 variants of input data represented - monthly and daily for whole sphere. There are also another timeperiods data: 1hr,3hr,6hr,yr. They all can be for different type of surface - land, ocean.
