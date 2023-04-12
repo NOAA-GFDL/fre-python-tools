@@ -1,4 +1,4 @@
-# cmor-mixer
+# CMORmixer
 Climate Model Output Rewriter is used to produce CF-compliant netCDF files. The structure of the files created by the library and the metadata they contain fulfill the requirements of many of the climate community's standard model experiments.
 CMOR can be considered a general purpose rewriter, agnostic to particular standards such as CMIP6. It accepts an configuration file that describes the output file name, global attributes, variable attributes, dimension names, and more. Example template files are included that adhere roughly to CMIP6 specifications. They may be modified to conform to other specifications.
 In current suite there are 2 variants of input data represented - monthly and daily for whole sphere. There are also another timeperiods data: 1hr,3hr,6hr,yr. They all can be for different type of surface - land, ocean.
@@ -16,10 +16,10 @@ Install fre-python-tools: https://github.com/NOAA-GFDL/fre-python-tools/blob/mai
 
 See command-line usage help
 
-cmor-mixer --help 
+CMORmixer --help 
 
 ```
-usage: cmor-mixer [-h] -d DIR2CMOR -l GFDL_VARS_FILE -r CMOR_TBL_JSON -p CMIP_INPUT_JSON [-x] [-o CMIP_OUTPUT]
+usage: CMORmixer [-h] -d DIR2CMOR -l GFDL_VARS_FILE -r CMOR_TBL_JSON -p CMIP_INPUT_JSON [-x] [-o CMIP_OUTPUT]
 
 CMORizing all files in directory specified in command line. Example: CMORmixer.py -d
 /archive/oar.gfdl.cmip6/CM4/warsaw_201710_om4_v1.0.1/CM4_1pctCO2_C/gfdl.ncrc4-intel16-prod-openmp/pp/atmos/ts/monthly/5yr -l
