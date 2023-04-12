@@ -6,7 +6,7 @@ import sys
 import argparse
 import math
 from subprocess import Popen, PIPE
-from psutil import Process
+#from psutil import Process
 
 import numpy
 #from numpy import ma
@@ -14,23 +14,24 @@ import numpy
 from netCDF4 import Dataset
 from cdo import Cdo
 
-
+#@profile
 def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
                                    do_weighted_avg=True, do_std_dev=True):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
         print("calling generate_frepythontools_timavg for file: " + targpath)
 
-    rssmem=Process().memory_info().rss/(1.e+6) #memory size in bytes
-    vmsmem=Process().memory_info().vms/(1.e+6) #memory size in bytes
-    print(f'rss/vms memory use pre-opening nc file: {rssmem} / {vmsmem} Kb')
+    #mem=Process().memory_info().rss/(1.e+6) #memory size in bytes
+    #rssmem=Process().memory_info().rss/(1.e+6) #memory size in bytes
+    #vmsmem=Process().memory_info().vms/(1.e+6) #memory size in bytes
+    #print(f'rss/vms memory use pre-opening nc file: {rssmem} / {vmsmem} Mb')
     nc_fin = Dataset(targpath, "r")
-    print(f'rss memory use after-opening nc file: {Process().memory_info().rss/1.e+6} Kb, \
-    diff from init is {(Process().memory_info().rss/1.e+6)-rssmem} Kb')
-    print(f'vms memory use after-opening nc file: {Process().memory_info().vms/1.e+6} Kb, \
-    diff from init is {(Process().memory_info().vms/1.e+6)-vmsmem} Kb')
+    #print(f'rss memory use after-opening nc file: {Process().memory_info().rss/1.e+6} Mb, \
+    #diff from init is {(Process().memory_info().rss/1.e+6)-rssmem} Mb')
+    #print(f'vms memory use after-opening nc file: {Process().memory_info().vms/1.e+6} Mb, \
+    #diff from init is {(Process().memory_info().vms/1.e+6)-vmsmem} Mb')
 
-    sys.exit()
+    #sys.exit()
     
     # check for the variable we're hoping is in the file
     fin_vars=nc_fin.variables
@@ -38,8 +39,8 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
         if str(key)==var:
             time_bnds=nc_fin['time_bnds'][:].copy()
             key_found=True
-            print(f'memory use after nc_fin[\'timebnds\'][:]: {Process().memory_info().rss/100000.} Kb, \
-            diff from init is {(Process().memory_info().rss-mem)/(1000000.)} Kb')
+            #print(f'memory use after nc_fin[\'timebnds\'][:]: {Process().memory_info().rss/100000.} Mb, \
+            #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
             break
     if not key_found:
         print('requested variable not found. exit.')
@@ -56,35 +57,37 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
     lat_bnd=fin_dims['lat'].size
     lon_bnd=fin_dims['lon'].size
     time_bnd=fin_dims['time'].size
-    print(f'memory use after fin.dimensions + sizes: {Process().memory_info().rss/100000.} Kb, \
-    diff from init is {(Process().memory_info().rss-mem)/(1000000.)} Kb')
+    #print(f'memory use after fin.dimensions + sizes: {Process().memory_info().rss/100000.} Mb, \
+    #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
 
     # initialize arrays
     avgvals=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
     if do_std_dev:
         stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
 
-    print(f'memory use after ndarray initialization with zeros: {Process().memory_info().rss/100000.} Kb, \
-    diff from init is {(Process().memory_info().rss-mem)/(1000000.)} Kb')
+    #print(f'memory use after ndarray initialization with zeros: {Process().memory_info().rss/100000.} Mb, \
+    #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
 
     ### is a 3-d array.
     ### val[time][lat][lon]
     #val_array=nc_fin[var][:]
 
     # compute average, for each lat/lon coordinate over time record in file
+    count=0
     for lon in range(lon_bnd):
         if lon%32 == 0:
             print(f'lon # {lon+1}/{lon_bnd}')
 
         for lat in range(lat_bnd):
+            count+=1
             # copy keeps the memory use lighter...
-            # diff from init memory went from ~21 Kb --> 8.6 Kb when i added copy.
+            # diff from init memory went from ~21 Mb --> 8.6 Mb when i added copy.
             val_array= numpy.moveaxis( nc_fin[var][:], 0, -1 )[lat][lon].copy()
             #val_array= numpy.moveaxis( nc_fin[var][:], 0, -1 )[lat][lon]
 
-            if lat%30 == 0:
-                print(f'(lat #{lat+1}/{lat_bnd}) memory use after copy of slice of value array: {Process().memory_info().rss/100000.} Kb, \
-                diff from init is {(Process().memory_info().rss-mem)/(1000000.)} Kb')
+            #if lat%30 == 0:
+            #    print(f'(lat #{lat+1}/{lat_bnd}) memory use after copy of slice of value array: {Process().memory_info().rss/100000.} Mb, \
+            #    diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
 
 
             if do_weighted_avg:
@@ -113,7 +116,9 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
                                                     ) / ( (time_bnd - 1. ) * time_bnd )
                                                   )
             del val_array
+            if count > 3600: break
             #break
+        if count > 3600: break
         #break
 
     #finish_time=time.perf_counter()
