@@ -15,11 +15,16 @@ from netCDF4 import Dataset
 from cdo import Cdo
 
 #@profile
-def generate_frepythontools_timavg(infile=None, outfile=None, var='LWP',
+def generate_frepythontools_timavg(infile=None, outfile=None, 
                                    do_weighted_avg=True, do_std_dev=True):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
         print("calling generate_frepythontools_timavg for file: " + infile)
+
+
+    var=infile.split('/').pop().split('.')[-2]
+    if __debug__:
+        print(f'var={var}')
 
     #mem=Process().memory_info().rss/(1.e+6) #memory size in bytes
     #rssmem=Process().memory_info().rss/(1.e+6) #memory size in bytes
@@ -141,7 +146,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None, var='LWP',
         nc_compare=Dataset( ('timavgcsh_atmos_LWP_test1979_5y.nc'), 'r')
         compare_avgvals=nc_compare[var][:]
         
-            print(
+        print(
                 f'compare_avgvals[0][0][0]= \
                 {compare_avgvals[0][0][0]}'    )
 
