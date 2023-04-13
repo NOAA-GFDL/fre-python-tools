@@ -15,17 +15,17 @@ from netCDF4 import Dataset
 from cdo import Cdo
 
 #@profile
-def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
+def generate_frepythontools_timavg(infile=None, outfile=None, var='LWP',
                                    do_weighted_avg=True, do_std_dev=True):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
-        print("calling generate_frepythontools_timavg for file: " + targpath)
+        print("calling generate_frepythontools_timavg for file: " + infile)
 
     #mem=Process().memory_info().rss/(1.e+6) #memory size in bytes
     #rssmem=Process().memory_info().rss/(1.e+6) #memory size in bytes
     #vmsmem=Process().memory_info().vms/(1.e+6) #memory size in bytes
     #print(f'rss/vms memory use pre-opening nc file: {rssmem} / {vmsmem} Mb')
-    nc_fin = Dataset(targpath, "r")
+    nc_fin = Dataset(infile, "r")
     #print(f'rss memory use after-opening nc file: {Process().memory_info().rss/1.e+6} Mb, \
     #diff from init is {(Process().memory_info().rss/1.e+6)-rssmem} Mb')
     #print(f'vms memory use after-opening nc file: {Process().memory_info().vms/1.e+6} Mb, \
@@ -116,32 +116,34 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
                                                     ) / ( (time_bnd - 1. ) * time_bnd )
                                                   )
             del val_array
-            if count > 3600: break
+            #if count > 3600: break
             #break
-        if count > 3600: break
+        #if count > 3600: break
         #break
 
     #finish_time=time.perf_counter()
     print("\n done with important part of generate_frepythontools_timavg")
     #print(f'Finished the important part in {round(finish_time - start_time , 2)} second(s)')
-
-    # for checking the averaging i do against the averaging timavg.csh does
-    nc_compare=Dataset( ('timavgcsh_atmos_LWP_test1979_5y.nc'), 'r')
-    compare_avgvals=nc_compare[var][:]
-
     if do_std_dev:
         print(
-        f'avgvals[0][0][0]        = \
-        {avgvals[0][0][0]} +/- {stddevs[0][0][0]}'  )
+            f'avgvals[0][0][0]        = \
+            {avgvals[0][0][0]} +/- {stddevs[0][0][0]}'  )
         print(f'type(stddevs[0][0][0])={type(stddevs[0][0][0])}')
     else:
         print(
-        f'avgvals[0][0][0]        = \
-        {avgvals[0][0][0]}'  )
-    print(f'type(avgvals[0][0][0])={type(avgvals[0][0][0])}')
-    print(
-        f'compare_avgvals[0][0][0]= \
-        {compare_avgvals[0][0][0]}'    )
+            f'avgvals[0][0][0]        = \
+            {avgvals[0][0][0]}'  )
+        print(f'type(avgvals[0][0][0])={type(avgvals[0][0][0])}')
+    
+
+    if __debug__:
+        # for checking the averaging i do against the averaging timavg.csh does
+        nc_compare=Dataset( ('timavgcsh_atmos_LWP_test1979_5y.nc'), 'r')
+        compare_avgvals=nc_compare[var][:]
+        
+            print(
+                f'compare_avgvals[0][0][0]= \
+                {compare_avgvals[0][0][0]}'    )
 
     ## write output file here
     nc_fout = Dataset( outfile, 'w',persist=True)
@@ -150,15 +152,15 @@ def generate_frepythontools_timavg(targpath=None, outfile=None, var=None,
 
 
 # must have done something like `module load fre-nctools`
-def generate_frenctools_timavg(targpath=None, outfile=None):
+def generate_frenctools_timavg(infile=None, outfile=None):
     ''' use fre-nctool's CLI timavg.csh with subprocess call '''
     if __debug__:
-        print(f'calling generate_frenctools_timavg for file: {targpath}')
+        print(f'calling generate_frenctools_timavg for file: {infile}')
 
-    #Popen(['timavg.csh','-r8','-mb','-o', outfile, targpath],
+    #Popen(['timavg.csh','-r8','-mb','-o', outfile, infile],
     #      stdout=PIPE, stderr=PIPE, shell=False)
 
-    with Popen(['timavg.csh','-r8','-mb','-o', outfile, targpath],
+    with Popen(['timavg.csh','-r8','-mb','-o', outfile, infile],
                stdout=PIPE, stderr=PIPE, shell=False) as subp:
         output=subp.communicate()[0]
         print(f'output={output}')
@@ -169,57 +171,58 @@ def generate_frenctools_timavg(targpath=None, outfile=None):
     #return
 
 # under construction
-def generate_nco_timavg(targpath=None, outfile=None):
+def generate_nco_timavg(infile=None, outfile=None):
     ''' use nco python module for time-averaging '''
     if __debug__:
-        print(f'calling generate_nco_timavg for file: {targpath}')
+        print(f'calling generate_nco_timavg for file: {infile}')
         print(f'output file: {outfile}')
-    #targpath=targdir+targfile    targoutpath=outfile
+    #infile=targdir+targfile    targoutpath=outfile
 
     #from nco import ncclimo
     print('under construction.')
     #return
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
-def generate_cdo_timavg(targpath=None, outfile=None):
+def generate_cdo_timavg(infile=None, outfile=None):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
-        print(f'calling generate_cdo_timavg for file: {targpath}')
+        print(f'calling generate_cdo_timavg for file: {infile}')
 
     cdo=Cdo()
-    cdo.timavg(input=targpath, output=outfile, returnCdf=True)
+    cdo.timavg(input=infile, output=outfile, returnCdf=True)
 
     #return
 
-def generate_time_average(pkg=None, targpath=None, outfile=None):
+def generate_time_average(pkg=None, infile=None, outfile=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
-        print(f'calling generate time averages for file: {targpath}')
+        print(f'calling generate time averages for file: {infile}')
 
     #needs a case statement
     if   pkg == "cdo"            :
-        generate_cdo_timavg(            targpath, outfile )
+        generate_cdo_timavg(            infile, outfile )
     elif pkg == "nco"            :
-        generate_nco_timavg(            targpath, outfile )
+        generate_nco_timavg(            infile, outfile )
     elif pkg == "fre-nctools"    :
-        generate_frenctools_timavg(     targpath, outfile )
-    elif pkg == "fre-pythontools":
-        generate_frepythontools_timavg( targpath, outfile, 'LWP' )
+        generate_frenctools_timavg(     infile, outfile )
+    elif pkg == "fre-python-tools":
+        generate_frepythontools_timavg( infile, outfile )
     else                         :
         print('requested package unknown. exit.')
 
     #return
 
-def main():
+def main(argv):
     ''' main, for steering, when called like `python generate_time_averages.py` '''
+    print(f'argv={argv}')
 
     ## argument parser TO DO
-    comp='atmos'
+    #comp='atmos'
     #VAR='droplets'
-    var='LWP'
+    #var='LWP'
 
-    targdir='./testfiles/'
-    targfile1=comp+'.197901-198312.'+var+'.nc'
+    #targdir='./testfiles/'
+    #targfile1=comp+'.197901-198312.'+var+'.nc'
     #targfile2=COMP+'.198401-198812.'+VAR+'.nc'
 
     # argparsing aspect still under construction
@@ -229,43 +232,65 @@ def main():
 
     #### every ArgumentParser comes with it's '-h' and '--help' flags pre-defined.
     #### if i redefine a flag that already exists, get a "conflicting option string" error
+#    argparser.add_argument('-d', '--debug',
+#                           help="set __debug__ to true (ignores arguments, runs stock-example, printouts)",
+#                           action="store_true", default=False)
     argparser.add_argument('-o', '--outf',
-                           help="output file name", type=str)
+                           help="output file name",
+                           type=str, default='fout.nc')
     argparser.add_argument('-i', '--inf',
-                           help="input file name", type=str)
-    argparser.add_argument('-c', '--comp',
-                           help="input model component of input file name", type=str)
-    argparser.add_argument('-v', '--var',
-                           help="variable from input to average", type=str)
-    #cli_args = argparser.parse_args()
-    #print(cli_args.outf)    #print(cli_args.inf)    #print('cli_args={cli_args}')
+                           help="input file name",
+                           type=str, default='fin.nc')
+    argparser.add_argument('-p','--pkg',
+                          help="package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]",
+                          type=str, default='fre-python-tools')
+    #    argparser.add_argument('-c', '--comp',
+    #                           help="input model component of input file name",
+    #                           type=str, default=None)
+    #    argparser.add_argument('-v', '--var',
+    #                           help="variable from input to average",
+    #                           type=str, default=None)
 
-    ## ----------------- cdo timavg calls
-    #generate_time_average( 'cdo', targdir+targfile1,
-    #                       'test_cdo_pypi_1.nc')
-    #generate_time_average( 'cdo', targdir+targfile2,
-    #                       'test_cdo_pypi_2.nc')
+    cli_args = argparser.parse_args()
+    print(f'cli_args={cli_args}')
+    #print(f'cli_args.debug={cli_args.debug}')
+    print(f'cli_args.outf ={cli_args.outf }')
+    print(f'cli_args.inf  ={cli_args.inf  }')
+    print(f'cli_args.pkg  ={cli_args.pkg  }')
 
-    ## ------------------ fre-nctools timavg.csh calls
-    #generate_time_average( 'fre-nctools', targdir+targfile1,
-    #                       'test_frenc_pypi_1.nc')
-    #generate_time_average( 'fre-nctools', targdir+targfile2,
-    #                       'test_frenc_pypi_2.nc')
+    if __debug__:
+        print(f'WARNING: running in debug mode')
+        ## ----------------- cdo timavg calls
+        #generate_time_average( 'cdo', targdir+targfile1,
+        #                       'test_cdo_pypi_1.nc')
+        #generate_time_average( 'cdo', targdir+targfile2,
+        #                       'test_cdo_pypi_2.nc')
+        
+        ## ------------------ fre-nctools timavg.csh calls
+        #generate_time_average( 'fre-nctools', targdir+targfile1,
+        #                       'test_frenc_pypi_1.nc')
+        #generate_time_average( 'fre-nctools', targdir+targfile2,
+        #                       'test_frenc_pypi_2.nc')
+    
+        # ------------------ fre-python-tools gen time average calls
+        #generate_time_average( 'fre-python-tools', targdir+targfile1,
+        #                       'test_frenc_pypi_1.nc')
+        #generate_time_average( 'fre-python-tools', targdir+targfile2,
+        #                       'test_frenc_pypi_2.nc')
+    else:
+        print(f'not debug mode! yay!          ')
+        generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf )
 
-    # ------------------ fre-python-tools gen time average calls
-    generate_time_average( 'fre-pythontools', targdir+targfile1,
-                           'test_frenc_pypi_1.nc')
-    #generate_time_average( 'fre-python-tools', targdir+targfile2,
-    #                       'test_frenc_pypi_2.nc')
-
+        
     #return
 
 #entry point for CLI usage, mainly for prototyping at this time.
 if __name__ == "__main__":
     import time
+    import sys
     print('calling main())')
     start_time=time.perf_counter()
-    main()
+    main(sys.argv[1:])
     finish_time=time.perf_counter()
     print('\n done calling main()')
     print(f'Finished in total time {round(finish_time - start_time , 2)} second(s)')
