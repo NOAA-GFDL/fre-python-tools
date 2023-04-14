@@ -15,7 +15,7 @@ from netCDF4 import Dataset
 from cdo import Cdo
 
 #@profile
-def generate_frepythontools_timavg(infile=None, outfile=None, 
+def generate_frepythontools_timavg(infile=None, outfile=None,
                                    do_weighted_avg=True, do_std_dev=True):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
@@ -37,14 +37,15 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     #diff from init is {(Process().memory_info().vms/1.e+6)-vmsmem} Mb')
 
     #sys.exit()
-    
+
     # check for the variable we're hoping is in the file
     fin_vars=nc_fin.variables
     for key in fin_vars:
         if str(key)==var:
             time_bnds=nc_fin['time_bnds'][:].copy()
             key_found=True
-            #print(f'memory use after nc_fin[\'timebnds\'][:]: {Process().memory_info().rss/100000.} Mb, \
+            #print(f'memory use after nc_fin[\'timebnds\'][:]: \
+            #    {Process().memory_info().rss/100000.} Mb, \
             #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
             break
     if not key_found:
@@ -62,20 +63,11 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     lat_bnd=fin_dims['lat'].size
     lon_bnd=fin_dims['lon'].size
     time_bnd=fin_dims['time'].size
-    #print(f'memory use after fin.dimensions + sizes: {Process().memory_info().rss/100000.} Mb, \
-    #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
 
     # initialize arrays
     avgvals=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
     if do_std_dev:
         stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
-
-    #print(f'memory use after ndarray initialization with zeros: {Process().memory_info().rss/100000.} Mb, \
-    #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
-
-    ### is a 3-d array.
-    ### val[time][lat][lon]
-    #val_array=nc_fin[var][:]
 
     # compute average, for each lat/lon coordinate over time record in file
     count=0
@@ -91,7 +83,8 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
             #val_array= numpy.moveaxis( nc_fin[var][:], 0, -1 )[lat][lon]
 
             #if lat%30 == 0:
-            #    print(f'(lat #{lat+1}/{lat_bnd}) memory use after copy of slice of value array: {Process().memory_info().rss/100000.} Mb, \
+            #    print(f'(lat #{lat+1}/{lat_bnd}) memory use after copy of slice of value array: \
+            #    {Process().memory_info().rss/100000.} Mb, \
             #    diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
 
 
@@ -139,13 +132,13 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
             f'avgvals[0][0][0]        = \
             {avgvals[0][0][0]}'  )
         print(f'type(avgvals[0][0][0])={type(avgvals[0][0][0])}')
-    
+
 
     if __debug__:
         # for checking the averaging i do against the averaging timavg.csh does
         nc_compare=Dataset( ('timavgcsh_atmos_LWP_test1979_5y.nc'), 'r')
         compare_avgvals=nc_compare[var][:]
-        
+
         print(
                 f'compare_avgvals[0][0][0]= \
                 {compare_avgvals[0][0][0]}'    )
@@ -157,41 +150,47 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
 
 
 # must have done something like `module load fre-nctools`
-def generate_frenctools_timavg(infile=None, outfile=None):
+def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
     ''' use fre-nctool's CLI timavg.csh with subprocess call '''
     if __debug__:
         print(f'calling generate_frenctools_timavg for file: {infile}')
 
-    #Popen(['timavg.csh','-r8','-mb','-o', outfile, infile],
-    #      stdout=PIPE, stderr=PIPE, shell=False)
+    print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
+    precision='-r8'
+    timavgcsh_command=['timavg.csh', precision, '-mb','-o', outfile, infile]
 
-    with Popen(['timavg.csh','-r8','-mb','-o', outfile, infile],
+    with Popen(timavgcsh_command,
                stdout=PIPE, stderr=PIPE, shell=False) as subp:
         output=subp.communicate()[0]
         print(f'output={output}')
 
         if subp.returncode < 0:
             print('error')
+        else:
+            print('success')
 
     #return
 
 # under construction
-def generate_nco_timavg(infile=None, outfile=None):
+def generate_nco_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
     ''' use nco python module for time-averaging '''
     if __debug__:
         print(f'calling generate_nco_timavg for file: {infile}')
         print(f'output file: {outfile}')
-    #infile=targdir+targfile    targoutpath=outfile
+
+    print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
 
     #from nco import ncclimo
-    print('under construction.')
+    print('under construction. do not use.')
     #return
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
-def generate_cdo_timavg(infile=None, outfile=None):
+def generate_cdo_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
+
+    print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
 
     cdo=Cdo()
     cdo.timavg(input=infile, output=outfile, returnCdf=True)
@@ -270,13 +269,13 @@ def main(argv):
         #                       'test_cdo_pypi_1.nc')
         #generate_time_average( 'cdo', targdir+targfile2,
         #                       'test_cdo_pypi_2.nc')
-        
+
         ## ------------------ fre-nctools timavg.csh calls
         #generate_time_average( 'fre-nctools', targdir+targfile1,
         #                       'test_frenc_pypi_1.nc')
         #generate_time_average( 'fre-nctools', targdir+targfile2,
         #                       'test_frenc_pypi_2.nc')
-    
+
         # ------------------ fre-python-tools gen time average calls
         #generate_time_average( 'fre-python-tools', targdir+targfile1,
         #                       'test_frenc_pypi_1.nc')
@@ -286,7 +285,7 @@ def main(argv):
         print(f'not debug mode! yay!          ')
         generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf )
 
-        
+
     #return
 
 #entry point for CLI usage, mainly for prototyping at this time.
