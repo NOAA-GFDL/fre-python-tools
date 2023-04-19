@@ -98,7 +98,12 @@ from shutil import copyfile
 global nameOfset, GFDL_vars_file, CMIP_output, GFDL_real_vars_file
 
     
-def copy_nc(in_nc, out_nc):    
+def copy_nc(in_nc, out_nc):   
+    """
+    Method to copy netcdf file contents from in_nc to out_nc
+    :param in_nc: path to input netcdf file
+    :param out_nc: path to output netcdf file
+    """  
     print("\tcopy_nc:  source_nc=", in_nc, " out_nc=", out_nc)
    # input file
     dsin = nc.Dataset(in_nc)
