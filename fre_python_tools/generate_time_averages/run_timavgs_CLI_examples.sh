@@ -18,17 +18,17 @@ ls $TARGETDIR/$PP_COMP.????01-????12.$VAR.nc
 echo "--------------------------------------------------"
 source ./timavgs_CLI_examples.sh
 
-##looks good but maybe not done here?
-echo "running timavg.csh examples"
-timavgcsh_ex
+###looks good but maybe not done here?
+#echo "running timavg.csh examples"
+#timavgcsh_ex
 
 ##looks good but maybe not done here?
 #echo "running local timavg.csh examples"
 #local_timavgcsh_ex
 
-##looks good but maybe not done here?
-#echo "running cdo timavg examples"
-#cdo_timavg_ex
+#looks good but maybe not done here?
+echo "running cdo timavg examples"
+cdo_timavg_ex
 
 ##looks good but maybe not done here?
 ##WOAH this is much faster than timavg...

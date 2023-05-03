@@ -30,11 +30,18 @@ function local_timavgcsh_ex(){
 function cdo_timavg_ex(){
 	module load cdo
 
-	if [ -f cdo_timavg_test1979_5y.nc ] ; then rm cdo_timavg_test1979_5y.nc ; fi
+	##avg the variable at each lat/lon point over all points in time --> one # per lat/lon point 
 	cdo timavg $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_timavg_${PP_COMP}_${VAR}_test1979_5y.nc
-	
-	if [ -f cdo_timavg_test1984_5y.nc ] ; then rm cdo_timavg_test1984_5y.nc ; fi										 
 	cdo timavg $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_timavg_${PP_COMP}_${VAR}_test1984_5y.nc
+	return
+	#avg the variable at each lat/lon point over each season --> four #'s per lat/lon point (one per season)
+	cdo yseasavg $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_yseasavg_${PP_COMP}_${VAR}_test1979_5y.nc
+	cdo yseasavg $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_yseasavg_${PP_COMP}_${VAR}_test1984_5y.nc
+	
+	#avg the variable at each lat/lon point over each month --> 12 #'s per lat/lon point (one per month)
+	cdo ymonavg $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_ymonavg_${PP_COMP}_${VAR}_test1979_5y.nc
+	cdo ymonavg $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_ymonavg_${PP_COMP}_${VAR}_test1984_5y.nc
+
 
 	return
 }

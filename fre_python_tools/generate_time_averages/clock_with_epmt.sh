@@ -11,8 +11,11 @@ module purge
 module load python
 module load epmt
 module list
+epmt annotate EPMT_JOB_TAGS="test_annotate_1:first_annotate"
+epmt annotate EPMT_JOB_TAGS="test_annotate_2:second_annotate"
 
 set -x 
+
 
 #epmt run -a python generate_time_averages.py
 
