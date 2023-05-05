@@ -1,0 +1,242 @@
+#####################################################################
+JobID 30027927 - begin Tue Apr  4 12:12:58 EDT 2023
+---------------------------------------------------------------------
+Job Name: epmt_gentimeaverage
+User: Ian.Laflotte
+Host: pp030
+Scratch TMPDIR: /vftmp/Ian.Laflotte/job30027927
+Submit host: an107
+#####################################################################
+Loading python/3.9
+  Loading requirement: conda
+Currently Loaded Modulefiles:
+ 1) conda <aL>   2) python/3.9   3) epmt/4.9.2(default)  
+
+Key:
+(symbolic-version)  <module-tag>  <aL>=auto-loaded  
++ epmt start
+++ epmt source
++ eval 'PAPIEX_OUTPUT=/vftmp/Ian.Laflotte/job30027927/epmt/Ian.Laflotte/30027927/;' 'PAPIEX_OPTIONS=COLLATED_TSV,PERF_COUNT_SW_CPU_CLOCK;' 'PAPIEX_OLD_LD_PRELOAD=;' 'PAPIEX_LD_PRELOAD=/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapiex.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libmonitor.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapi.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpfm.so;' epmt_push_preload '()' '{' if '[' -z '"$PAPIEX_OLD_LD_PRELOAD"' '];' then export 'LD_PRELOAD=$PAPIEX_LD_PRELOAD' ';' else export 'LD_PRELOAD=$PAPIEX_LD_PRELOAD:$PAPIEX_OLD_LD_PRELOAD' ';' fi '};' epmt_pop_preload '()' '{' if '[' -z '"$PAPIEX_OLD_LD_PRELOAD"' '];' then export -n LD_PRELOAD ';' else export 'LD_PRELOAD=$PAPIEX_OLD_LD_PRELOAD' ';' fi '};' epmt_instrument '()' '{' export MONITOR_DEBUG PAPIEX_OUTPUT PAPIEX_DEBUG PAPIEX_OPTIONS 'LD_PRELOAD;' 'epmt_push_preload;' '};' epmt_uninstrument '()' '{' export -n MONITOR_DEBUG PAPIEX_OUTPUT PAPIEX_DEBUG 'PAPIEX_OPTIONS;' 'epmt_pop_preload;' '};' 'epmt_instrument;'
+++ PAPIEX_OUTPUT=/vftmp/Ian.Laflotte/job30027927/epmt/Ian.Laflotte/30027927/
+++ PAPIEX_OPTIONS=COLLATED_TSV,PERF_COUNT_SW_CPU_CLOCK
+++ PAPIEX_OLD_LD_PRELOAD=
+++ PAPIEX_LD_PRELOAD=/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapiex.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libmonitor.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapi.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpfm.so
+++ epmt_instrument
+++ export MONITOR_DEBUG PAPIEX_OUTPUT PAPIEX_DEBUG PAPIEX_OPTIONS LD_PRELOAD
+++ epmt_push_preload
+++ '[' -z '' ']'
+++ export LD_PRELOAD=/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapiex.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libmonitor.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapi.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpfm.so
+++ LD_PRELOAD=/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapiex.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libmonitor.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpapi.so:/home/fms/local/epmt/4.9.2-centos-7/papiex-epmt-install/lib/libpfm.so
++ python generate_time_averages.py
+calling main())
+calling generate time averages for file: ./testfiles/atmos.197901-198312.LWP.nc
+calling generate_frepythontools_timavg for file: ./testfiles/atmos.197901-198312.LWP.nc
+lat # 1 out of 180 iters
+lat # 2 out of 180 iters
+lat # 3 out of 180 iters
+lat # 4 out of 180 iters
+lat # 5 out of 180 iters
+lat # 6 out of 180 iters
+lat # 7 out of 180 iters
+lat # 8 out of 180 iters
+lat # 9 out of 180 iters
+lat # 10 out of 180 iters
+lat # 11 out of 180 iters
+lat # 12 out of 180 iters
+lat # 13 out of 180 iters
+lat # 14 out of 180 iters
+lat # 15 out of 180 iters
+lat # 16 out of 180 iters
+lat # 17 out of 180 iters
+lat # 18 out of 180 iters
+lat # 19 out of 180 iters
+lat # 20 out of 180 iters
+lat # 21 out of 180 iters
+lat # 22 out of 180 iters
+lat # 23 out of 180 iters
+lat # 24 out of 180 iters
+lat # 25 out of 180 iters
+lat # 26 out of 180 iters
+lat # 27 out of 180 iters
+lat # 28 out of 180 iters
+lat # 29 out of 180 iters
+lat # 30 out of 180 iters
+lat # 31 out of 180 iters
+lat # 32 out of 180 iters
+lat # 33 out of 180 iters
+lat # 34 out of 180 iters
+lat # 35 out of 180 iters
+lat # 36 out of 180 iters
+lat # 37 out of 180 iters
+lat # 38 out of 180 iters
+lat # 39 out of 180 iters
+lat # 40 out of 180 iters
+lat # 41 out of 180 iters
+lat # 42 out of 180 iters
+lat # 43 out of 180 iters
+lat # 44 out of 180 iters
+lat # 45 out of 180 iters
+lat # 46 out of 180 iters
+lat # 47 out of 180 iters
+lat # 48 out of 180 iters
+lat # 49 out of 180 iters
+lat # 50 out of 180 iters
+lat # 51 out of 180 iters
+lat # 52 out of 180 iters
+lat # 53 out of 180 iters
+lat # 54 out of 180 iters
+lat # 55 out of 180 iters
+lat # 56 out of 180 iters
+lat # 57 out of 180 iters
+lat # 58 out of 180 iters
+lat # 59 out of 180 iters
+lat # 60 out of 180 iters
+lat # 61 out of 180 iters
+lat # 62 out of 180 iters
+lat # 63 out of 180 iters
+lat # 64 out of 180 iters
+lat # 65 out of 180 iters
+lat # 66 out of 180 iters
+lat # 67 out of 180 iters
+lat # 68 out of 180 iters
+lat # 69 out of 180 iters
+lat # 70 out of 180 iters
+lat # 71 out of 180 iters
+lat # 72 out of 180 iters
+lat # 73 out of 180 iters
+lat # 74 out of 180 iters
+lat # 75 out of 180 iters
+lat # 76 out of 180 iters
+lat # 77 out of 180 iters
+lat # 78 out of 180 iters
+lat # 79 out of 180 iters
+lat # 80 out of 180 iters
+lat # 81 out of 180 iters
+lat # 82 out of 180 iters
+lat # 83 out of 180 iters
+lat # 84 out of 180 iters
+lat # 85 out of 180 iters
+lat # 86 out of 180 iters
+lat # 87 out of 180 iters
+lat # 88 out of 180 iters
+lat # 89 out of 180 iters
+lat # 90 out of 180 iters
+lat # 91 out of 180 iters
+lat # 92 out of 180 iters
+lat # 93 out of 180 iters
+lat # 94 out of 180 iters
+lat # 95 out of 180 iters
+lat # 96 out of 180 iters
+lat # 97 out of 180 iters
+lat # 98 out of 180 iters
+lat # 99 out of 180 iters
+lat # 100 out of 180 iters
+lat # 101 out of 180 iters
+lat # 102 out of 180 iters
+lat # 103 out of 180 iters
+lat # 104 out of 180 iters
+lat # 105 out of 180 iters
+lat # 106 out of 180 iters
+lat # 107 out of 180 iters
+lat # 108 out of 180 iters
+lat # 109 out of 180 iters
+lat # 110 out of 180 iters
+lat # 111 out of 180 iters
+lat # 112 out of 180 iters
+lat # 113 out of 180 iters
+lat # 114 out of 180 iters
+lat # 115 out of 180 iters
+lat # 116 out of 180 iters
+lat # 117 out of 180 iters
+lat # 118 out of 180 iters
+lat # 119 out of 180 iters
+lat # 120 out of 180 iters
+lat # 121 out of 180 iters
+lat # 122 out of 180 iters
+lat # 123 out of 180 iters
+lat # 124 out of 180 iters
+lat # 125 out of 180 iters
+lat # 126 out of 180 iters
+lat # 127 out of 180 iters
+lat # 128 out of 180 iters
+lat # 129 out of 180 iters
+lat # 130 out of 180 iters
+lat # 131 out of 180 iters
+lat # 132 out of 180 iters
+lat # 133 out of 180 iters
+lat # 134 out of 180 iters
+lat # 135 out of 180 iters
+lat # 136 out of 180 iters
+lat # 137 out of 180 iters
+lat # 138 out of 180 iters
+lat # 139 out of 180 iters
+lat # 140 out of 180 iters
+lat # 141 out of 180 iters
+lat # 142 out of 180 iters
+lat # 143 out of 180 iters
+lat # 144 out of 180 iters
+lat # 145 out of 180 iters
+lat # 146 out of 180 iters
+lat # 147 out of 180 iters
+lat # 148 out of 180 iters
+lat # 149 out of 180 iters
+lat # 150 out of 180 iters
+lat # 151 out of 180 iters
+lat # 152 out of 180 iters
+lat # 153 out of 180 iters
+lat # 154 out of 180 iters
+lat # 155 out of 180 iters
+lat # 156 out of 180 iters
+lat # 157 out of 180 iters
+lat # 158 out of 180 iters
+lat # 159 out of 180 iters
+lat # 160 out of 180 iters
+lat # 161 out of 180 iters
+lat # 162 out of 180 iters
+lat # 163 out of 180 iters
+lat # 164 out of 180 iters
+lat # 165 out of 180 iters
+lat # 166 out of 180 iters
+lat # 167 out of 180 iters
+lat # 168 out of 180 iters
+lat # 169 out of 180 iters
+lat # 170 out of 180 iters
+lat # 171 out of 180 iters
+lat # 172 out of 180 iters
+lat # 173 out of 180 iters
+lat # 174 out of 180 iters
+lat # 175 out of 180 iters
+lat # 176 out of 180 iters
+lat # 177 out of 180 iters
+lat # 178 out of 180 iters
+lat # 179 out of 180 iters
+lat # 180 out of 180 iters
+
+ done with important part of generate_frepythontools_timavg
+avgvals[0][0][0]        =         0.000846405307367399 +/- 6.142338059250105e-06
+type(stddevs[0][0][0])=<class 'numpy.float64'>
+type(avgvals[0][0][0])=<class 'numpy.float64'>
+compare_avgvals[0][0][0]=         0.0008464052807539701
+
+ done calling main()
+Finished in total time 742.77 second(s)
++ epmt stop
+WARNING: init_settings: PAPIEX_OUTPUT variable should not be defined, it will be ignored
+WARNING: init_settings: PAPIEX_OPTIONS variable should not be defined, it will be ignored
+++ epmt stage
+WARNING: init_settings: PAPIEX_OUTPUT variable should not be defined, it will be ignored
+WARNING: init_settings: PAPIEX_OPTIONS variable should not be defined, it will be ignored
++ f=/nbhome/epmt/.submit/30027927.tgz
++ epmt submit /nbhome/epmt/.submit/30027927.tgz
+WARNING: init_settings: PAPIEX_OUTPUT variable should not be defined, it will be ignored
+WARNING: init_settings: PAPIEX_OPTIONS variable should not be defined, it will be ignored
+Imported successfully - job: 30027927 processes: 3 rate: 17.063390495691493
+#####################################################################
+Job Name: epmt_gentimeaverage
+User: Ian.Laflotte
+Host: pp030
+Removed TMPDIR: /vftmp/Ian.Laflotte/job30027927
+Submit host: an107
+---------------------------------------------------------------------
+JobID 30027927 - end Tue Apr  4 12:25:46 EDT 2023
+#####################################################################

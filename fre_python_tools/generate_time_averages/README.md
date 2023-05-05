@@ -1,6 +1,6 @@
 Generates time averages 
 Returns FOO, else, BAR
-
+ 
 Environment variables used:
 - UNGA
 
