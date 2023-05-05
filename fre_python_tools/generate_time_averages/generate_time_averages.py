@@ -43,7 +43,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     for key in fin_vars:
         if str(key)==var:
             time_bnds=nc_fin['time_bnds'][:].copy()
-            key_found=True
+            key_found=True            
             #print(f'memory use after nc_fin[\'timebnds\'][:]: \
             #    {Process().memory_info().rss/100000.} Mb, \
             #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
@@ -185,7 +185,7 @@ def generate_nco_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_
     #return
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
-def generate_cdo_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
+def generate_cdo_timavg(infile=None, outfile=None, avgtype=None, do_weighted_avg=True, do_std_dev=True):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
@@ -193,9 +193,17 @@ def generate_cdo_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_
     print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
 
     cdo=Cdo()
-    cdo.timavg(input=infile, output=outfile, returnCdf=True)
+    if avgtype == "seasonal":
+        print(f'seasonal averaging requested.')
+        exitcode=cdo.yseasmean(input=infile, output=outfile+"_yseasmean", returnCdf=True)
+    elif avgtype == "monthly":
+        print(f'monthly averaging requested.')
+        exitcode=cdo.ymonmean(input=infile, output=outfile+"_ymonmean", returnCdf=True)
+    else:
+        print(f'averaging all available time info over each lat/lon point')
+        exitcode=cdo.timmean(input=infile, output=outfile+"_timmean", returnCdf=True)
 
-    #return
+    return exitcode
 
 def generate_time_average(pkg=None, infile=None, outfile=None):
     ''' steering function to various averaging functions above'''
@@ -205,6 +213,8 @@ def generate_time_average(pkg=None, infile=None, outfile=None):
     #needs a case statement
     if   pkg == "cdo"            :
         generate_cdo_timavg(            infile, outfile )
+        generate_cdo_timavg(            infile, outfile, "seasonal" )
+        generate_cdo_timavg(            infile, outfile, "monthly" )
     elif pkg == "nco"            :
         generate_nco_timavg(            infile, outfile )
     elif pkg == "fre-nctools"    :

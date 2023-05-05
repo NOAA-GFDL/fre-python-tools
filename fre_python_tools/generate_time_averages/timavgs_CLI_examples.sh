@@ -34,7 +34,7 @@ function cdo_timavg_ex(){
 	cdo timavg $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_timavg_${PP_COMP}_${VAR}_test1979_5y.nc
 	cdo timavg $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_timavg_${PP_COMP}_${VAR}_test1984_5y.nc
 	return
-	#avg the variable at each lat/lon point over each season --> four #'s per lat/lon point (one per season)
+	#avg the variable at each lat/lon point over each season --> four #'s per lat/lon point (one per season)/xtmp/Ian.Laflotte/work/
 	cdo yseasavg $TARGETDIR/${PP_COMP}.197901-198312.${VAR}.nc ./cdo_yseasavg_${PP_COMP}_${VAR}_test1979_5y.nc
 	cdo yseasavg $TARGETDIR/${PP_COMP}.198401-198812.${VAR}.nc ./cdo_yseasavg_${PP_COMP}_${VAR}_test1984_5y.nc
 	
