@@ -126,6 +126,19 @@ def copy_nc(in_nc, out_nc):
     
     
 def var2process(proj_tbl_vars, var_lst, dir2cmor, var_i, time_arr, N, CMIP_input_json, CMOR_tbl_vars_file):
+
+    """
+    Method to process variable var_i
+    :param proj_tbl_vars: common variable to pass needed data
+    :param var_lst: list of var_i
+    :param dir2cmor: path to var_i
+    :param var_i: variable to process
+    :param time_arr: time range of var_i
+    :param N: size of time_arr
+    :param CMIP_input_json: Experiment Name File explaining of what source type is used here
+    :param CMOR_tbl_vars_file: CMOR file with CMIP descriptions of variables
+    """
+
     print ("\nGFDL Variable : PCMDI Variable (var2process:var_lst[var2process]) => ")    
     print (var_i, ":", var_lst[var_i])
     print("\tProcessing Directory/File:", var_i)    
@@ -181,6 +194,17 @@ def var2process(proj_tbl_vars, var_lst, dir2cmor, var_i, time_arr, N, CMIP_input
 
 
 def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_vars_file):
+
+    """
+    Methods to process 
+    :param proj_tbl_vars: common variable to pass needed data
+    :param nc_fl: original source file 
+    :param var_lst: list of var_i
+    :param var_i: variable to process
+    :param CMIP_input_json: Experiment Name File explaining of what source type is used here
+    :param CMOR_tbl_vars_file: CMOR file with CMIP descriptions of variables
+    """
+    
     print ("\n===> Starting netcdf_var():")
     print("input data:", "\n\tvar_lst=", var_lst, "\n\tnc_fl=", nc_fl, "\n\tvar_i=", var_i)
 
@@ -194,10 +218,6 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
         if name == "bnds":
             bnds_in = 1
             print("bnds exists in original netcdf:", variable[0], variable[1])
-#            dims = variable.dimensions
-#            for dim in dims:
-#                if ds[dim].axis and ds[dim].axis == "Z":
-#                    vert_dim = dim			             	   
 
         if name == var_i:
             dims = variable.dimensions
@@ -302,6 +322,15 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
 
 
 def main():   
+
+    """
+    Methods to process 
+    :param dir2cmor: archive directory where the original files exist. 
+    :param GFDL_vars_file: list of variables in table 
+    :param CMOR_tbl_json: CMOR file with CMIP descriptions of variables
+    :param CMIP_input_json: Experiment Name File expaining of what source type is used here
+    :param CMIP_output: CMORized output files location (not required), default=/local2; it also can be like /home/$USER, or /net|work<i>/san, etc., default=/local2
+    """
 
     parser = argparse.ArgumentParser(description="CMORizing all files in directory specified in command line. Example: CMORmixer.py \
     -d /archive/oar.gfdl.cmip6/CM4/warsaw_201710_om4_v1.0.1/CM4_1pctCO2_C/gfdl.ncrc4-intel16-prod-openmp/pp/atmos/ts/monthly/5yr \
