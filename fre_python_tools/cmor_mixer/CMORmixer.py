@@ -144,7 +144,7 @@ def var2process(proj_tbl_vars, var_lst, dir2cmor, var_i, time_arr, N, CMIP_input
     print("\tProcessing Directory/File:", var_i)    
     nc_fls = {}
     tmp_dir = "/tmp/"
-#    print("from var2process: CMIP_output=", CMIP_output)
+
     if CMIP_output == "/local2" or  CMIP_output.find("/work") != -1 or CMIP_output.find("/net") != -1:
         tmp_dir = "/"        
     for i in range(N):
@@ -244,17 +244,16 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
     # read the input units
     var = ds[var_i][:]
     var_dim = len(var.shape)
-    print("var_dim= ", var_dim, " var_lst[var_i]=",var_lst[var_i])
-#    print("Line 208: var_i=", var_i)
-#    units = proj_tbl_vars["variable_entry"] [var_lst[var_i]] ["units"]
+    print("var_lst[var_i]=",var_lst[var_i])
+
     units = proj_tbl_vars["variable_entry"] [var_i] ["units"]
-    print("dimension=", var_dim, " units=", units)
+    print("var_dim=", var_dim, " units=", units)
 
     # Define lat and lon dimensions
     # Assume input file is lat/lon grid
     if "xh" in var_list:
         raise Exception ("Ocean grid unimplemented")
-# figure out the names of this dimension names programmatically !!!	
+
     lat = ds["lat"][:]
     lon = ds["lon"][:]
     lat_bnds = ds["lat_bnds"][:]
@@ -267,9 +266,9 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
     n = len(time)
     tm_units = ds["time"].units
     time_bnds = []
-#    print("from Ln236: tm_units=", tm_units)
+
     try:
-#        print("Executing cmor.axis('time', coord_vals=time, cell_bounds=time_bnds, units=tm_units)") 	
+        print("Executing cmor.axis(time, coord_vals=time, cell_bounds=time_bnds, units=tm_units)") 	
         time_bnds = ds["time_bnds"][:]            
         cmorTime = cmor.axis("time", coord_vals=time, cell_bounds=time_bnds, units=tm_units)
         print("tm_bnds=", time_bnds)
@@ -277,11 +276,11 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
         if  time_bnds == []:
             for i in range(n):
                 time_bnds[i] = time[i+1] - time[i]
-        print("Executing cmorTime = cmor.axis('time', coord_vals=time, units=tm_units)") 
+        print("Executing cmorTime = cmor.axis(time, coord_vals=time, units=tm_units)") 
         cmorTime = cmor.axis("time", coord_vals=time, cell_bounds=time_bnds, units=tm_units)
 
     # Set the axes
-#    print("var_dim = ",var_dim) 
+    print("var_dim = ",var_dim) 
     if var_dim==3:
         axes = [cmorTime, cmorLat, cmorLon]
         if bnds_in == 0:
@@ -308,7 +307,6 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
         raise Exception("Did not expect more than 4 dimensions; got", var_dim)
 
     # Write the output to disk
-#    cmorVar = cmor.variable(var_lst[var_i], units, axes)
     cmorVar = cmor.variable(var_i, units, axes)
     cmor.write(cmorVar, var)
     filename = cmor.close(cmorVar, file_name=True)
@@ -362,19 +360,17 @@ def main():
     # open input variable list
     f_v = open(GFDL_vars_file,"r")
     GFDL_var_lst = json.load(f_v)
-#    for x in  GFDL_var_lst:
-#        print("GFDL_var_lst: x=", x)   
-#    exit()
+
     # examine input files to obtain available date ranges
     Var_FileNames = []
     Var_FileNames_all = os.listdir(dir2cmor)
-#    print(Var_FileNames_all) 	
+    print(Var_FileNames_all) 	
     for file in Var_FileNames_all:
         if file.endswith('.nc'):
             Var_FileNames.append(file)
     Var_FileNames.sort()
-#    print("Var_FileNames=",Var_FileNames)
-#    exit() 
+    print("Var_FileNames=",Var_FileNames)
+
     nameOfset = Var_FileNames[0].split(".")[0]
     time_arr_s = set()
     for filename in Var_FileNames:
