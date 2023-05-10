@@ -97,8 +97,16 @@ from shutil import copyfile
 
 global nameOfset, GFDL_vars_file, CMIP_output, GFDL_real_vars_file
 
+
     
-def copy_nc(in_nc, out_nc):    
+def copy_nc(in_nc, out_nc): 
+    
+    """
+    Method to copy netcdf file contents from in_nc to out_nc
+    :param in_nc: path to input netcdf file
+    :param out_nc: path to output netcdf file
+    """
+    
     print("\tcopy_nc:  source_nc=", in_nc, " out_nc=", out_nc)
    # input file
     dsin = nc.Dataset(in_nc)
@@ -120,7 +128,21 @@ def copy_nc(in_nc, out_nc):
     return
     
     
+    
 def var2process(proj_tbl_vars, var_lst, dir2cmor, var_i, time_arr, N, CMIP_input_json, CMOR_tbl_vars_file):
+
+    """
+    Method to process variable var_i
+    :param proj_tbl_vars: common variable to pass needed data
+    :param var_lst: list of var_i
+    :param dir2cmor: path to var_i
+    :param var_i: variable to process
+    :param time_arr: time range of var_i
+    :param N: size of time_arr
+    :param CMIP_input_json: Experiment Name File explaining of what source type is used here
+    :param CMOR_tbl_vars_file: CMOR file with CMIP descriptions of variables
+    """
+
     print ("\nGFDL Variable : PCMDI Variable (var2process:var_lst[var2process]) => ")    
     print (var_i, ":", var_lst[var_i])
     print("\tProcessing Directory/File:", var_i)    
@@ -129,10 +151,10 @@ def var2process(proj_tbl_vars, var_lst, dir2cmor, var_i, time_arr, N, CMIP_input
 #    print("from var2process: CMIP_output=", CMIP_output)
     if CMIP_output == "/local2" or  CMIP_output.find("/work") != -1 or CMIP_output.find("/net") != -1:
         tmp_dir = "/"        
+        
     for i in range(N):
         nc_fls[i] = dir2cmor + "/" + nameOfset + "." + time_arr[i] + "." + var_i + ".nc"        
         nc_fl_wrk = CMIP_output + tmp_dir + nameOfset + "." + time_arr[i] + "." + var_i + ".nc"
-        print("\tnc_fl_wrk = ", nc_fl_wrk)
 
         if not os.path.exists(nc_fls[i]) or var_i == "ps":
             print ("\t", nc_fls[i], " does not exist. Move to the next file.")
@@ -163,19 +185,28 @@ def var2process(proj_tbl_vars, var_lst, dir2cmor, var_i, time_arr, N, CMIP_input
         if not chk_str.isdigit():
             filename_corr = filename[:filename.rfind(".nc")] + "_" + time_arr[i] + ".nc"    
             mv_cmnd = "mv " + filename + " " + filename_corr
-            print("2: mv_cmnd = ", mv_cmnd)
+            print("    mv_cmnd = ", mv_cmnd)
             os.system(mv_cmnd)
-            print (mv_cmnd)
 
         if os.path.exists(nc_fl_wrk):
             os.remove(nc_fl_wrk)
                             
     return
 
-# NetCDF all time periods
 
 
 def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_vars_file):
+
+    """
+    Methods to process filename (=cmor.close(cmorVar, file_name=True))
+    :param proj_tbl_vars: common variable to pass needed data
+    :param nc_fl: original source file 
+    :param var_lst: list of var_i
+    :param var_i: variable to process
+    :param CMIP_input_json: Experiment Name File explaining of what source type is used here
+    :param CMOR_tbl_vars_file: CMOR file with CMIP descriptions of variables
+    """
+    
     print ("\n===> Starting netcdf_var():")
     print("input data:", "\n\tvar_lst=", var_lst, "\n\tnc_fl=", nc_fl, "\n\tvar_i=", var_i)
 
@@ -189,10 +220,6 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
         if name == "bnds":
             bnds_in = 1
             print("bnds exists in original netcdf:", variable[0], variable[1])
-#            dims = variable.dimensions
-#            for dim in dims:
-#                if ds[dim].axis and ds[dim].axis == "Z":
-#                    vert_dim = dim			             	   
 
         if name == var_i:
             dims = variable.dimensions
@@ -219,21 +246,21 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
     # read the input units
     var = ds[var_i][:]
     var_dim = len(var.shape)
-    print("var_dim= ", var_dim, " var_lst[var_i]=",var_lst[var_i])
-#    print("Line 208: var_i=", var_i)
-#    units = proj_tbl_vars["variable_entry"] [var_lst[var_i]] ["units"]
+    print("var_lst[var_i]=",var_lst[var_i])
+
     units = proj_tbl_vars["variable_entry"] [var_i] ["units"]
-    print("dimension=", var_dim, " units=", units)
+    print("var_dim=", var_dim, " units=", units)
 
     # Define lat and lon dimensions
     # Assume input file is lat/lon grid
     if "xh" in var_list:
         raise Exception ("Ocean grid unimplemented")
-# figure out the names of this dimension names programmatically !!!	
+
     lat = ds["lat"][:]
     lon = ds["lon"][:]
     lat_bnds = ds["lat_bnds"][:]
     lon_bnds = ds["lon_bnds"][:]
+    
     cmorLat = cmor.axis("latitude", coord_vals=lat, cell_bounds=lat_bnds, units="degrees_N")
     cmorLon = cmor.axis("longitude", coord_vals=lon, cell_bounds=lon_bnds, units="degrees_E")
     
@@ -242,22 +269,23 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
     n = len(time)
     tm_units = ds["time"].units
     time_bnds = []
-#    print("from Ln236: tm_units=", tm_units)
+
     try:
-#        print("Executing cmor.axis('time', coord_vals=time, cell_bounds=time_bnds, units=tm_units)") 	
+#        print("Executing cmor.axis(time, coord_vals=time, cell_bounds=time_bnds, units=tm_units)") 	
         time_bnds = ds["time_bnds"][:]            
         cmorTime = cmor.axis("time", coord_vals=time, cell_bounds=time_bnds, units=tm_units)
-        print("tm_bnds=", time_bnds)
+        print("time_bnds=", time_bnds)
     except:
         if  time_bnds == []:
             for i in range(n):
                 time_bnds[i] = time[i+1] - time[i]
-        print("Executing cmorTime = cmor.axis('time', coord_vals=time, units=tm_units)") 
+        print("Executing cmorTime = cmor.axis(time, coord_vals=time, units=tm_units)") 
         cmorTime = cmor.axis("time", coord_vals=time, cell_bounds=time_bnds, units=tm_units)
 
     # Set the axes
 #    print("var_dim = ",var_dim) 
     if var_dim==3:
+        print("====== >>> Attention!!! var_dim == 3") 
         axes = [cmorTime, cmorLat, cmorLon]
         if bnds_in == 0:
             print("bnds_in == 0; needs to define bnds[]") 
@@ -283,7 +311,6 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
         raise Exception("Did not expect more than 4 dimensions; got", var_dim)
 
     # Write the output to disk
-#    cmorVar = cmor.variable(var_lst[var_i], units, axes)
     cmorVar = cmor.variable(var_i, units, axes)
     cmor.write(cmorVar, var)
     filename = cmor.close(cmorVar, file_name=True)
@@ -292,11 +319,19 @@ def netcdf_var (proj_tbl_vars, var_lst, nc_fl, var_i, CMIP_input_json, CMOR_tbl_
     
     return filename
 
-#def check_bnds():
     
 
 
 def main():   
+
+    """
+    Methods to process 
+    :param dir2cmor: archive directory where the original files exist. 
+    :param GFDL_vars_file: list of variables in table 
+    :param CMOR_tbl_json: CMOR file with CMIP descriptions of variables
+    :param CMIP_input_json: Experiment Name File expaining of what source type is used here
+    :param CMIP_output: CMORized output files location (not required), default=/local2; it also can be like /home/$USER, or /net|work<i>/san, etc., default=/local2
+    """
 
     parser = argparse.ArgumentParser(description="CMORizing all files in directory specified in command line. Example: CMORmixer.py \
     -d /archive/oar.gfdl.cmip6/CM4/warsaw_201710_om4_v1.0.1/CM4_1pctCO2_C/gfdl.ncrc4-intel16-prod-openmp/pp/atmos/ts/monthly/5yr \
@@ -307,7 +342,6 @@ def main():
     parser.add_argument('-l', dest='GFDL_vars_file', help='GFDL list of variables in table', required=True)
     parser.add_argument('-r', dest='CMOR_tbl_json', help='CMOR file with CMIP descriptions of variables', required=True)
     parser.add_argument('-p', dest='CMIP_input_json', help='Experiment Name File expaining of what source type is used here', required=True)
-    parser.add_argument('-x', dest='')
     parser.add_argument('-o', dest='CMIP_output', help='CMORized output files location (not required), default=/local2; it also can be like /home/$USER, or /net|work<i>/san, etc.', default="/local2")
     args = parser.parse_args()
         
@@ -328,19 +362,18 @@ def main():
     # open input variable list
     f_v = open(GFDL_vars_file,"r")
     GFDL_var_lst = json.load(f_v)
-#    for x in  GFDL_var_lst:
-#        print("GFDL_var_lst: x=", x)   
-#    exit()
+
     # examine input files to obtain available date ranges
     Var_FileNames = []
     Var_FileNames_all = os.listdir(dir2cmor)
 #    print(Var_FileNames_all) 	
+
     for file in Var_FileNames_all:
         if file.endswith('.nc'):
             Var_FileNames.append(file)
     Var_FileNames.sort()
 #    print("Var_FileNames=",Var_FileNames)
-#    exit() 
+
     nameOfset = Var_FileNames[0].split(".")[0]
     time_arr_s = set()
     for filename in Var_FileNames:
