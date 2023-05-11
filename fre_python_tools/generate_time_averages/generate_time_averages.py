@@ -291,6 +291,7 @@ def main(argv):
         #                       'test_frenc_pypi_1.nc')
         #generate_time_average( 'fre-python-tools', targdir+targfile2,
         #                       'test_frenc_pypi_2.nc')
+        generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf )
     else:
         print(f'not debug mode! yay!          ')
         generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf )

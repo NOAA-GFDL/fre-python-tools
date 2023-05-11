@@ -3,6 +3,9 @@ channels:
   - conda-forge
 dependencies:
   - cmor
+  - cdo
+  - python-cdo
+  - xarray
   - pip
   - pip:
-    -  git+https://github.com/NOAA-GFDL/fre-python-tools.git
+    - pytest
