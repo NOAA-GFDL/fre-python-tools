@@ -1,11 +1,15 @@
 #!/bin/sh
 
+
+module load conda
+conda activate fre-python-tools
+
 # little script to help keep me oriented.
 # for dev purposes only, will be removed in final implementation
 
 #module load epmt
-module load git
-module load python
+#module load git
+#module load python
 #module load ncview
 #module load fre-nctools
 
