@@ -1,4 +1,5 @@
-from fre_python_tools import generate_time_averages as gta
+#from fre_python_tools import generate_time_averages as gta
+from fre_python_tools.generate_time_averages import *
 import pathlib as pl
 
 time_avg_dir='./tests/time_avg_test_files/'
@@ -44,11 +45,17 @@ def test_CLI_cdo_time_avg_output_exists():
                  pl.Path( time_avg_dir+'cdo_yseasmean_CLI_test_atmos_LWP_1979_5y.nc' ).exists() ,
                  pl.Path( time_avg_dir+'cdo_timmean_CLI_test_atmos_LWP_1979_5y.nc'   ).exists()   ])
     
-#def test_cdo_time_averages():
-#    ''' generates a time average using cdo '''
-#    print(f'HELLO WORLD from test_cdo_time_averages')
-#    assert True
-#
+def test_cdo_monthly_time_average():
+    ''' generates a monthly time averaged file using cdo '''
+    infile =time_avg_dir+'atmos.197901-198312.LWP.nc'
+    outfile=time_avg_dir+'ymonmean_atmos.197901-198312.LWP.nc'
+    if pl.Path(outfile).exists():
+        pl.Path(outfile).unlink() #delete file so we can check that it can be recreated
+
+    generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='monthly')
+    #gta.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='monthly')
+    assert pl.Path(outfile).exists()
+
 #def test_frepytools_time_averages():
 #    ''' doc string '''
 #    print(f'HELLO WORLD from test_frepytools_time_averages')

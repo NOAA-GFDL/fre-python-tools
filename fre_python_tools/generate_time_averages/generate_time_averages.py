@@ -185,7 +185,7 @@ def generate_nco_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_
     #return
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
-def generate_cdo_timavg(infile=None, outfile=None, avgtype=None, do_weighted_avg=True, do_std_dev=True):
+def generate_cdo_timavg(infile=None, outfile=None, avg_type='all', do_weighted_avg=True, do_std_dev=True):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
@@ -193,28 +193,32 @@ def generate_cdo_timavg(infile=None, outfile=None, avgtype=None, do_weighted_avg
     print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
 
     cdo=Cdo()
-    if avgtype == "seasonal":
+    if avg_type == "seas": #seasonal averaging
         print(f'seasonal averaging requested.')
-        exitcode=cdo.yseasmean(input=infile, output=outfile+"_yseasmean", returnCdf=True)
-    elif avgtype == "monthly":
+        exitcode=cdo.yseasmean(infile=infile, output=outfile, returnCdf=True)
+    elif avg_type == "month": #monthly averaging
         print(f'monthly averaging requested.')
-        exitcode=cdo.ymonmean(input=infile, output=outfile+"_ymonmean", returnCdf=True)
-    else:
+        exitcode=cdo.ymonmean(infile=infile, output=outfile, returnCdf=True)
+    elif avg_type == "all": #average all available time info
         print(f'averaging all available time info over each lat/lon point')
-        exitcode=cdo.timmean(input=infile, output=outfile+"_timmean", returnCdf=True)
+        exitcode=cdo.timmean(infile=infile, output=outfile, returnCdf=True)
+    else:
+        if __debug__:
+            print(f'ERROR!')
+        exitcode=-1
 
     return exitcode
 
-def generate_time_average(pkg=None, infile=None, outfile=None):
+def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
 
     #needs a case statement
     if   pkg == "cdo"            :
-        generate_cdo_timavg(            infile, outfile )
-        generate_cdo_timavg(            infile, outfile, "seasonal" )
-        generate_cdo_timavg(            infile, outfile, "monthly" )
+        generate_cdo_timavg(            infile, outfile, avg_type )
+        #generate_cdo_timavg(            infile, outfile, "seasonal" )
+        #generate_cdo_timavg(            infile, outfile, "monthly" )
     elif pkg == "nco"            :
         generate_nco_timavg(            infile, outfile )
     elif pkg == "fre-nctools"    :
@@ -258,6 +262,9 @@ def main(argv):
     argparser.add_argument('-p','--pkg',
                           help="package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]",
                           type=str, default='fre-python-tools')
+    argparser.add_argument('-a','--avg',
+                           help="type of time average to generate [e.g. month,seas,all]",
+                          type=str, default='all')
     #    argparser.add_argument('-c', '--comp',
     #                           help="input model component of input file name",
     #                           type=str, default=None)
@@ -266,11 +273,12 @@ def main(argv):
     #                           type=str, default=None)
 
     cli_args = argparser.parse_args()
-    print(f'cli_args={cli_args}')
-    #print(f'cli_args.debug={cli_args.debug}')
-    print(f'cli_args.outf ={cli_args.outf }')
-    print(f'cli_args.inf  ={cli_args.inf  }')
-    print(f'cli_args.pkg  ={cli_args.pkg  }')
+    if __debug__:
+        print(f'cli_args={cli_args}')
+        #print(f'cli_args.debug={cli_args.debug}')
+        print(f'cli_args.outf ={cli_args.outf }')
+        print(f'cli_args.inf  ={cli_args.inf  }')
+        print(f'cli_args.pkg  ={cli_args.pkg  }')
 
     if __debug__:
         print(f'WARNING: running in debug mode')
@@ -291,10 +299,10 @@ def main(argv):
         #                       'test_frenc_pypi_1.nc')
         #generate_time_average( 'fre-python-tools', targdir+targfile2,
         #                       'test_frenc_pypi_2.nc')
-        generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf )
+        generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg )
     else:
         print(f'not debug mode! yay!          ')
-        generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf )
+        generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg )
 
 
     #return
