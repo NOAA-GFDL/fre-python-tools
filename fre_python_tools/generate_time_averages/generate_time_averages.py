@@ -19,7 +19,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
                                    do_weighted_avg=True, do_std_dev=True):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
-        print("calling generate_frepythontools_timavg for file: " + infile)
+        print('calling generate_frepythontools_timavg for file: ' + infile)
 
 
     var=infile.split('/').pop().split('.')[-2]
@@ -30,7 +30,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     #rssmem=Process().memory_info().rss/(1.e+6) #memory size in bytes
     #vmsmem=Process().memory_info().vms/(1.e+6) #memory size in bytes
     #print(f'rss/vms memory use pre-opening nc file: {rssmem} / {vmsmem} Mb')
-    nc_fin = Dataset(infile, "r")
+    nc_fin = Dataset(infile, 'r')
     #print(f'rss memory use after-opening nc file: {Process().memory_info().rss/1.e+6} Mb, \
     #diff from init is {(Process().memory_info().rss/1.e+6)-rssmem} Mb')
     #print(f'vms memory use after-opening nc file: {Process().memory_info().vms/1.e+6} Mb, \
@@ -120,7 +120,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
         #break
 
     #finish_time=time.perf_counter()
-    print("\n done with important part of generate_frepythontools_timavg")
+    print('\n done with important part of generate_frepythontools_timavg')
     #print(f'Finished the important part in {round(finish_time - start_time , 2)} second(s)')
     if do_std_dev:
         print(
@@ -189,42 +189,43 @@ def generate_cdo_timavg(infile=None, outfile=None, avg_type='all', do_weighted_a
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
+        print(f'outfile={outfile}')
+        print(f'avg_type={avg_type}')        
+    #print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
 
-    print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
-
-    cdo=Cdo()
-    if avg_type == "seas": #seasonal averaging
+    _cdo=Cdo()
+    if avg_type == 'seas': #seasonal averaging
         print(f'seasonal averaging requested.')
-        exitcode=cdo.yseasmean(infile=infile, output=outfile, returnCdf=True)
-    elif avg_type == "month": #monthly averaging
+        _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
+    elif avg_type == 'month': #monthly averaging
         print(f'monthly averaging requested.')
-        exitcode=cdo.ymonmean(infile=infile, output=outfile, returnCdf=True)
-    elif avg_type == "all": #average all available time info
+        _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
+    elif avg_type == 'all': #average all available time info
         print(f'averaging all available time info over each lat/lon point')
-        exitcode=cdo.timmean(infile=infile, output=outfile, returnCdf=True)
+        #_cdo.timmean(input=infile, output=outfile, returnCdf=True)
+        _cdo.timmean(input=infile, returnCdf=True)
     else:
         if __debug__:
             print(f'ERROR!')
-        exitcode=-1
 
-    return exitcode
+    #return exitcode
 
 def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
-
+ 
     #needs a case statement
-    if   pkg == "cdo"            :
-        generate_cdo_timavg(            infile, outfile, avg_type )
-        #generate_cdo_timavg(            infile, outfile, "seasonal" )
-        #generate_cdo_timavg(            infile, outfile, "monthly" )
-    elif pkg == "nco"            :
-        generate_nco_timavg(            infile, outfile )
-    elif pkg == "fre-nctools"    :
-        generate_frenctools_timavg(     infile, outfile )
-    elif pkg == "fre-python-tools":
-        generate_frepythontools_timavg( infile, outfile )
+    if   pkg == 'cdo'            :
+        generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
+        #generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type='seasonal' )
+        #generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type='monthly' )
+    elif pkg == 'nco'            :
+        generate_nco_timavg(            infile=infile, outfile=outfile )
+    elif pkg == 'fre-nctools'    :
+        generate_frenctools_timavg(     infile=infile, outfile=outfile )
+    elif pkg == 'fre-python-tools':
+        generate_frepythontools_timavg( infile=infile, outfile=outfile )
     else                         :
         print('requested package unknown. exit.')
 
@@ -245,31 +246,31 @@ def main(argv):
 
     # argparsing aspect still under construction
     argparser = argparse.ArgumentParser(
-        description="generate time averages for specified set of netCDF files. Example: \
-        generate-time-averages.py /path/to/your/files/")
+        description='generate time averages for specified set of netCDF files. Example: \
+        generate-time-averages.py /path/to/your/files/')
 
     #### every ArgumentParser comes with it's '-h' and '--help' flags pre-defined.
     #### if i redefine a flag that already exists, get a "conflicting option string" error
 #    argparser.add_argument('-d', '--debug',
-#                           help="set __debug__ to true (ignores arguments, runs stock-example, printouts)",
-#                           action="store_true", default=False)
+#                           help='set __debug__ to true (ignores arguments, runs stock-example, printouts)',
+#                           action='store_true', default=False)
     argparser.add_argument('-o', '--outf',
-                           help="output file name",
+                           help='output file name',
                            type=str, default='fout.nc')
     argparser.add_argument('-i', '--inf',
-                           help="input file name",
+                           help='input file name',
                            type=str, default='fin.nc')
     argparser.add_argument('-p','--pkg',
-                          help="package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]",
+                          help='package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]',
                           type=str, default='fre-python-tools')
     argparser.add_argument('-a','--avg',
-                           help="type of time average to generate [e.g. month,seas,all]",
+                           help='type of time average to generate [e.g. month,seas,all]',
                           type=str, default='all')
     #    argparser.add_argument('-c', '--comp',
-    #                           help="input model component of input file name",
+    #                           help='input model component of input file name',
     #                           type=str, default=None)
     #    argparser.add_argument('-v', '--var',
-    #                           help="variable from input to average",
+    #                           help='variable from input to average',
     #                           type=str, default=None)
 
     cli_args = argparser.parse_args()
@@ -308,7 +309,7 @@ def main(argv):
     #return
 
 #entry point for CLI usage, mainly for prototyping at this time.
-if __name__ == "__main__":
+if __name__ == '__main__':
     import time
     import sys
     print('calling main())')

@@ -1,8 +1,7 @@
-#from fre_python_tools import generate_time_averages as gta
-from fre_python_tools.generate_time_averages import *
+#from fre_python_tools.generate_time_averages import *
 import pathlib as pl
 
-time_avg_dir='./tests/time_avg_test_files/'
+time_avg_dir=str(pl.Path.cwd())+'/tests/time_avg_test_files/'
 
 def test_cwd_for_tests():
     cwd_path=str( pl.Path.cwd() ).split('/')
@@ -47,12 +46,18 @@ def test_CLI_cdo_time_avg_output_exists():
     
 def test_cdo_monthly_time_average():
     ''' generates a monthly time averaged file using cdo '''
+    from fre_python_tools.generate_time_averages import generate_time_averages as gtas
+
     infile =time_avg_dir+'atmos.197901-198312.LWP.nc'
     outfile=time_avg_dir+'ymonmean_atmos.197901-198312.LWP.nc'
+    print(f' time_avg_dir={time_avg_dir}\n, infile={infile}\n outfile={outfile}\n')
     if pl.Path(outfile).exists():
+        print(f'output test file exists. deleting before remaking.')
         pl.Path(outfile).unlink() #delete file so we can check that it can be recreated
-
-    generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='monthly')
+        
+    #gtas.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='month')
+    #gtas.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='seas')
+    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='all')
     #gta.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='monthly')
     assert pl.Path(outfile).exists()
 
