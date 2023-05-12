@@ -2,9 +2,9 @@ name: fre-python-tools
 channels:
   - conda-forge
 dependencies:
-  - cmor
-  - cdo
+  - cdo=1.9.10
   - python-cdo
+  - cmor
   - xarray
   - pip
   - pip:

@@ -1,4 +1,3 @@
-#from fre_python_tools.generate_time_averages import *
 import pathlib as pl
 
 time_avg_dir=str(pl.Path.cwd())+'/tests/time_avg_test_files/'
@@ -44,24 +43,46 @@ def test_CLI_cdo_time_avg_output_exists():
                  pl.Path( time_avg_dir+'cdo_yseasmean_CLI_test_atmos_LWP_1979_5y.nc' ).exists() ,
                  pl.Path( time_avg_dir+'cdo_timmean_CLI_test_atmos_LWP_1979_5y.nc'   ).exists()   ])
     
-def test_cdo_monthly_time_average():
+def test_monthly_python_cdo_time_averages():
     ''' generates a monthly time averaged file using cdo '''
+    from fre_python_tools.generate_time_averages import generate_time_averages as gtas
+    infile =time_avg_dir+'atmos.197901-198312.LWP.nc'
+    monthly_outfile=time_avg_dir+'ymonmean_atmos.197901-198312.LWP.nc'
+    
+    print(f' time_avg_dir={time_avg_dir}\n, infile={infile}\n monthly_outfile={monthly_outfile}\n')
+    if pl.Path(monthly_outfile).exists():
+        print(f'output test file exists. deleting before remaking.')
+        pl.Path(monthly_outfile).unlink() #delete file so we can check that it can be recreated
+        
+    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=monthly_outfile, avg_type='month')
+    assert pl.Path(monthly_outfile).exists()
+    
+def test_seasonal_python_cdo_time_averages():
+    ''' generates a seasonal time averaged file using cdo '''
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
 
     infile =time_avg_dir+'atmos.197901-198312.LWP.nc'
-    outfile=time_avg_dir+'ymonmean_atmos.197901-198312.LWP.nc'
+    seasonal_outfile=time_avg_dir+'yseasmean_atmos.197901-198312.LWP.nc'
+    print(f' time_avg_dir={time_avg_dir}\n, infile={infile}\n seasonal_outfile={seasonal_outfile}\n')
+    
+    if pl.Path(seasonal_outfile).exists():
+        print(f'output test file exists. deleting before remaking.')
+        pl.Path(seasonal_outfile).unlink() #delete file so we can check that it can be recreated
+        
+    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=seasonal_outfile, avg_type='seas')
+    assert pl.Path(seasonal_outfile).exists()
+
+def test_python_cdo_time_averages():
+    ''' generates a time averaged file using cdo '''
+    from fre_python_tools.generate_time_averages import generate_time_averages as gtas
+
+    infile =time_avg_dir+'atmos.197901-198312.LWP.nc'
+    outfile=time_avg_dir+'timmean_atmos.197901-198312.LWP.nc'
     print(f' time_avg_dir={time_avg_dir}\n, infile={infile}\n outfile={outfile}\n')
+    
     if pl.Path(outfile).exists():
         print(f'output test file exists. deleting before remaking.')
         pl.Path(outfile).unlink() #delete file so we can check that it can be recreated
         
-    #gtas.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='month')
-    #gtas.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='seas')
     gtas.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='all')
-    #gta.generate_time_average(pkg='cdo', infile=infile, outfile=outfile, avg_type='monthly')
     assert pl.Path(outfile).exists()
-
-#def test_frepytools_time_averages():
-#    ''' doc string '''
-#    print(f'HELLO WORLD from test_frepytools_time_averages')
-#    assert True

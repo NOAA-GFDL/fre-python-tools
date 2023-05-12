@@ -185,30 +185,37 @@ def generate_nco_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_
     #return
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
-def generate_cdo_timavg(infile=None, outfile=None, avg_type='all', do_weighted_avg=True, do_std_dev=True):
+def generate_cdo_timavg(infile=None, outfile=None, avg_type=None)
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
         print(f'outfile={outfile}')
         print(f'avg_type={avg_type}')        
     #print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
+    if not any([avg_type==None,avg_type=='seas',avg_type=='month']):
+        print(f'ERROR')
+        return
+    
 
     _cdo=Cdo()
     if avg_type == 'seas': #seasonal averaging
         print(f'seasonal averaging requested.')
         _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
+        print(f'done averaging')
     elif avg_type == 'month': #monthly averaging
         print(f'monthly averaging requested.')
         _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
-    elif avg_type == 'all': #average all available time info
-        print(f'averaging all available time info over each lat/lon point')
-        #_cdo.timmean(input=infile, output=outfile, returnCdf=True)
-        _cdo.timmean(input=infile, returnCdf=True)
+        print(f'done averaging')
     else:
-        if __debug__:
-            print(f'ERROR!')
+        print(f'averaging all available time info over each lat/lon point')
+        _cdo.timmean(input=infile, output=outfile, returnCdf=True)
+        print(f'done averaging')
 
-    #return exitcode
+    return
+#else:
+#if __debug__:
+#print(f'ERROR!')
+
 
 def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     ''' steering function to various averaging functions above'''
@@ -218,8 +225,6 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     #needs a case statement
     if   pkg == 'cdo'            :
         generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
-        #generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type='seasonal' )
-        #generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type='monthly' )
     elif pkg == 'nco'            :
         generate_nco_timavg(            infile=infile, outfile=outfile )
     elif pkg == 'fre-nctools'    :
