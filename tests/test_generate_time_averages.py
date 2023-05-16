@@ -77,7 +77,7 @@ def test_python_cdo_time_averages():
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
 
     infile =time_avg_dir+'atmos.197901-198312.LWP.nc'
-    outfile=time_avg_dir+'timmean_atmos.197901-198312.LWP.nc'
+    outfile=time_avg_dir+'SOMETHINGELSE_atmos.197901-198312.LWP.nc'
     print(f' time_avg_dir={time_avg_dir}\n, infile={infile}\n outfile={outfile}\n')
     
     if pl.Path(outfile).exists():
