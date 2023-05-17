@@ -1,11 +1,10 @@
-Generates time averages 
-Returns FOO, else, BAR
- 
-Environment variables used:
-- UNGA
+From an input netCDF file, output a time-averaged netCDF file.
 
-Arguments used:
-- BUNGA
+Will average all available information on a given variable across time,
+but can also handle monthly+seasonal averaging.
 
-To run test suite:
-- prove -v tests/*.t
+Requires CDO and the python-cdo bindings to such.
+
+To run time-averaging tests, return to root directory and call just those
+tests with `python -m pytest tests/test_generate_time_averages.py`, or run
+all tests with `python -m pytests tests/`.
