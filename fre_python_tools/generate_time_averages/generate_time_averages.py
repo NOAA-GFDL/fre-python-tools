@@ -12,7 +12,6 @@ import numpy
 #from numpy import ma
 
 from netCDF4 import Dataset
-from cdo import Cdo
 
 #@profile
 def generate_frepythontools_timavg(infile=None, outfile=None,
@@ -21,7 +20,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     if __debug__:
         print('calling generate_frepythontools_timavg for file: ' + infile)
 
-
+    exitstatus=1
     var=infile.split('/').pop().split('.')[-2]
     if __debug__:
         print(f'var={var}')
@@ -43,15 +42,14 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     for key in fin_vars:
         if str(key)==var:
             time_bnds=nc_fin['time_bnds'][:].copy()
-            key_found=True            
+            key_found=True
             #print(f'memory use after nc_fin[\'timebnds\'][:]: \
             #    {Process().memory_info().rss/100000.} Mb, \
             #diff from init is {(Process().memory_info().rss-mem)/(1.e+6)} Mb')
             break
     if not key_found:
         print('requested variable not found. exit.')
-        assert False
-        sys.exit()
+        return exitstatus
 
 
     # check for mask (will be important for later dev stages)
@@ -146,7 +144,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     ## write output file here
     nc_fout = Dataset( outfile, 'w',persist=True)
     nc_fout.close()
-    #return
+    return 0
 
 
 # must have done something like `module load fre-nctools`
@@ -158,6 +156,7 @@ def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, 
     print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
     precision='-r8'
     timavgcsh_command=['timavg.csh', precision, '-mb','-o', outfile, infile]
+    exitstatus=1
 
     with Popen(timavgcsh_command,
                stdout=PIPE, stderr=PIPE, shell=False) as subp:
@@ -166,10 +165,12 @@ def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, 
 
         if subp.returncode < 0:
             print('error')
+            exitstatus=1
         else:
             print('success')
+            exitstatus=0
 
-    #return
+    return exitstatus
 
 # under construction
 def generate_nco_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
@@ -182,59 +183,64 @@ def generate_nco_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_
 
     #from nco import ncclimo
     print('under construction. do not use.')
-    #return
+    return 1
 
 # must be in conda env with pip-installed cdo package (`pip install cdo --user`)
-def generate_cdo_timavg(infile=None, outfile=None, avg_type=None)
+def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
         print(f'outfile={outfile}')
-        print(f'avg_type={avg_type}')        
-    #print(f'(do_weighted_avg,do_std_dev)=({do_weighted_avg},{do_std_dev})')
-    if not any([avg_type==None,avg_type=='seas',avg_type=='month']):
-        print(f'ERROR')
-        return
-    
+        print(f'avg_type={avg_type}')
 
+    if all([avg_type!='all',avg_type!='seas',avg_type!='month']):
+        print(f'ERROR, avg_type requested unknown.')
+        return 1
+
+    from cdo import Cdo
     _cdo=Cdo()
-    if avg_type == 'seas': #seasonal averaging
-        print(f'seasonal averaging requested.')
-        _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging')
-    elif avg_type == 'month': #monthly averaging
-        print(f'monthly averaging requested.')
-        _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging')
-    else:
-        print(f'averaging all available time info over each lat/lon point')
+    
+    if avg_type == 'all':
+        print(f'time-averaging requested.')
         _cdo.timmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging')
+        print(f'time averaging requested')
+    elif avg_type == 'seas':
+        print(f'seasonal time-averaging requested.')
+        _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
+        print(f'done averaging over seasons')
+    elif avg_type == 'month':
+        print(f'time-averaging requested.')
+        _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
+        print(f'done averaging over months')
+    else:
+        print(f'problem.')
+        return 1
 
-    return
-#else:
-#if __debug__:
-#print(f'ERROR!')
+    print(f'done averaging')
+
+    return 0
 
 
 def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
- 
+    exitstatus=1
+
     #needs a case statement
     if   pkg == 'cdo'            :
-        generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
+        exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
     elif pkg == 'nco'            :
-        generate_nco_timavg(            infile=infile, outfile=outfile )
+        exitstatus=generate_nco_timavg(            infile=infile, outfile=outfile )
     elif pkg == 'fre-nctools'    :
-        generate_frenctools_timavg(     infile=infile, outfile=outfile )
+        exitstatus=generate_frenctools_timavg(     infile=infile, outfile=outfile )
     elif pkg == 'fre-python-tools':
-        generate_frepythontools_timavg( infile=infile, outfile=outfile )
+        exitstatus=generate_frepythontools_timavg( infile=infile, outfile=outfile )
     else                         :
         print('requested package unknown. exit.')
+        exitstatus=1
 
-    #return
+    return exitstatus
 
 def main(argv):
     ''' main, for steering, when called like `python generate_time_averages.py` '''

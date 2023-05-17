@@ -21,7 +21,6 @@ conda env create --file environment.yml
 
 ```
 conda activate fre-python-tools
-pip install .
 ```
 
 3. Run tests and evaluate outcome
@@ -29,7 +28,7 @@ pip install .
 tests can run with
 
 ```
-pytest
+python -m pytest tests/
 ```
 
 There should be no errors if installation proceeded correctly. You may get a harmless
