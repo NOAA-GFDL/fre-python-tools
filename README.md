@@ -3,7 +3,7 @@ Python-based tools and interfaces to be used by FRE workflows
 
 _______________________________________________________________________________________
 _______________________________________________________________________________________
-## FOR DEVELOPMENT: miniconda/pip installation
+## miniconda installation
 
 Many prerequisites for `fre-python-tools` are available via miniconda. Because of this
 creating a conda environment and pip-installing the package is preferred for
@@ -37,7 +37,7 @@ package.
 
 _______________________________________________________________________________________
 _______________________________________________________________________________________
-## FOR USERS: miniconda installation via gfdl-channel (currently chris.blanton channel)
+## miniconda installation via gfdl conda-channel (currently chris.blanton channel)
 
 one-line installation from Christopher Blanton's conda channel:
 
@@ -51,14 +51,49 @@ In the future, this will be done through a gfdl conda channel:
 conda install fre-python-tools --channel=gfdl
 ```
 
-_______________________________________________________________________________________
-_______________________________________________________________________________________
-## For Developers Maintaining fre-python-tools package on gfdl conda channel
-
-
 Make your changes to the relevant places in environment.yml, meta.yaml, setup.cfg, and 
-publish the recipe to the conda channel
+publish the recipe to the conda channel if desired (requires conda-build)
 
 ```
 conda build . 
 ```
+
+____________________________________________________________________________________
+_______________________________________________________________________________________
+
+## Install with pip alone (not generally recommended)
+This method will not install all prerequisites, so is not recommended except for
+purposes where the conda prerequisites are not needed.
+
+1. Create virtual python environment
+
+```
+python3 -m venv /path/to/your/install
+```
+
+2. Activate the environment
+
+```
+source /path/to/your/install/bin/activate
+```
+
+3. Upgrade pip and setuptools
+
+```
+pip install --upgrade pip setuptools
+```
+
+4. Install fre-python-tools and dependencies
+
+```
+pip install .
+```
+
+5. Run tests
+
+```
+pip install pytest
+pytest
+```
+
+
