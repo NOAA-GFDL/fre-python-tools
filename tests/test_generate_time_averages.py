@@ -70,5 +70,5 @@ def test_python_cdo_time_averages():
         pl.Path(all_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=all_outfile, avg_type='all') #doesn't work
+    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=all_outfile, avg_type='all')
     assert pl.Path(all_outfile).exists()

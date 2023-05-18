@@ -91,7 +91,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
     return 0
 
 
-# must have done something like `module load fre-nctools`
+# must have fre-nctools, which is not included in the conda env by default.
 def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
     ''' use fre-nctool's CLI timavg.csh with subprocess call '''
     if __debug__:
@@ -115,7 +115,7 @@ def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, 
 
     return exitstatus
 
-# must be in conda env with pip-installed cdo package (`pip install cdo --user`)
+
 def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
@@ -160,8 +160,6 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     #needs a case statement
     if   pkg == 'cdo'            :
         exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
-    elif pkg == 'nco'            :
-        exitstatus=generate_nco_timavg(            infile=infile, outfile=outfile )
     elif pkg == 'fre-nctools'    :
         exitstatus=generate_frenctools_timavg(     infile=infile, outfile=outfile )
     elif pkg == 'fre-python-tools':
