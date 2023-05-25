@@ -170,19 +170,17 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
 
     return exitstatus
 
-def main(argv):
+def main():
     ''' main, for steering, when called like `python generate_time_averages.py` '''
-    print(f'argv={argv}')
-
     argparser = argparse.ArgumentParser(
         description='generate time averages for specified set of netCDF files. Example: \
         generate-time-averages.py /path/to/your/files/')
-    argparser.add_argument('-o', '--outf',
-                           help='output file name',
-                           type=str, default='fout.nc')
-    argparser.add_argument('-i', '--inf',
+    argparser.add_argument('inf',
                            help='input file name',
-                           type=str, default='fin.nc')
+                           type=str)
+    argparser.add_argument('outf',
+                           help='output file name',
+                           type=str)
     argparser.add_argument('-p','--pkg',
                           help='package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]',
                           type=str, default='fre-python-tools')
@@ -193,13 +191,10 @@ def main(argv):
     generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg )
 
 
-#entry point for CLI usage, mainly for prototyping at this time.
 if __name__ == '__main__':
     import time
     import sys
-    print('calling main()')
     start_time=time.perf_counter()
     main(sys.argv[1:])
     finish_time=time.perf_counter()
-    print('\n done calling main()')
     print(f'Finished in total time {round(finish_time - start_time , 2)} second(s)')
