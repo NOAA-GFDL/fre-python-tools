@@ -1,13 +1,28 @@
 # fre-python-tools
 Python-based tools and interfaces to be used by FRE workflows
 
-## Install prerequisites with conda and fre-python-tools with pip
+## Install fre-python-tools and dependencies with conda
 
-Many prerequisites for `fre-python-tools` are available via conda, so
-creating a conda environment and pip-installing the package is preferred for
-development purposes.
+`fre-python-tools` is available on NOAA-GFDL's anaconda channel.
+To create a new conda environment containing `fre-python-tools`:
 
-1. Create conda environment that contains all prerequisites
+```
+conda create --name fre-python-tools fre-python-tools --channel=noaa-gfdl
+```
+
+Then, activate the environment to bring fre-python-tools libraries and scripts into your PATH.
+
+```
+conda activate fre-python-tools
+```
+
+## Install dependencies only with conda
+
+For developing `fre-python-tools`, we recommend installing the dependencies
+with conda. Then, one can import and use `fre-python-tool` libraries
+and run `pytest` tests.
+
+1. Create conda environment with fre-python-tool dependencies
 ```
 conda env create --file environment.yml
 ```
@@ -18,10 +33,10 @@ conda env create --file environment.yml
 conda activate fre-python-tools-dev
 ```
 
-3. Run tests and evaluate outcome
+3. Run tests
 
-At this point, fre-python-tools is not installed in your environment.
-You can run tests on the checked-out code with `python -m pytest`
+While fre-python-tools is not installed in your environment,
+you can run tests on the checked-out code with `python -m pytest`
 (compared to `pytest` which does NOT add the current directory to `sys.path`.)
 
 ```
@@ -32,28 +47,18 @@ There should be no errors. You may get a harmless
 warning regarding the deprecation of `sre_constants` within the `metomi.isodatetime`
 package.
 
-4. Install fre-python-tools into conda environment
-```
-pip install .
-```
+## Build conda package
 
-You can run tests on the installed code with:
-```
-pytest
-```
+To test the conda packaging, you can build the fre-python-tools package using conda-build.
 
-## Install fre-python-tools with conda
-
-`fre-python-tools` is available on NOAA-GFDL's anaconda channel.
-To create a new conda environment containing `fre-python-tools`:
-
+1. Install conda-build (into either an isolated conda environment or the base environment)
 
 ```
-conda create --name fre-python-tools fre-python-tools --channel=noaa-gfdl
+conda install conda-build
 ```
 
-Then, activate the environment to bring fre-python-tools libraries and scripts into your PATH.
+2. Build fre-python-tools
 
 ```
-conda activate fre-python-tools
+conda build .
 ```
