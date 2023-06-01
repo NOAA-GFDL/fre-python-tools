@@ -21,8 +21,8 @@ def test_time_avg_input_file_exists():
 
 def test_CLI_time_avg_ex_exists():
     ''' look for shell script examples '''
-    assert all([ pl.Path( './tests/timavgs_CLI_examples.sh'     ).exists() ,
-                 pl.Path( './tests/run_timavgs_CLI_examples.sh' ).exists() ])
+    assert all([ pl.Path( time_avg_dir+'../timavgs_CLI_examples.sh'     ).exists() ,
+                 pl.Path( time_avg_dir+'../run_timavgs_CLI_examples.sh' ).exists() ])
 
 
 def test_CLI_cdo_time_avg_output_exists():
