@@ -9,13 +9,16 @@ from subprocess import Popen, PIPE
 import numpy
 from netCDF4 import Dataset
 
-def generate_frepythontools_timavg(infile=None, outfile=None,
+def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
                                    do_weighted_avg=True, do_std_dev=True):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
         print('calling generate_frepythontools_timavg for file: ' + infile)
 
-    exitstatus=1
+    if avg_type!='all':
+        print(f'ERROR: avg_type={avg_type} is not supported by this function at this time.')
+        return 1
+
     var=infile.split('/').pop().split('.')[-2]
     if __debug__:
         print(f'var={var}')
@@ -31,7 +34,7 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
             break
     if not key_found:
         print('requested variable not found. exit.')
-        return exitstatus
+        return 1
 
 
     # check for mask (will be important for later dev stages)
@@ -92,15 +95,18 @@ def generate_frepythontools_timavg(infile=None, outfile=None,
 
 
 # must have fre-nctools, which is not included in the conda env by default.
-def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, do_std_dev=True):
+def generate_frenctools_timavg(infile=None, outfile=None, avg_type='all', do_weighted_avg=True, do_std_dev=True):
     ''' use fre-nctool's CLI timavg.csh with subprocess call '''
     if __debug__:
         print(f'calling generate_frenctools_timavg for file: {infile}')
+    exitstatus=1
+    if avg_type!='all':
+        print(f'ERROR: avg_type={avg_type} is not supported by this function at this time.')
+        return exitstatus
 
     precision='-r8'
     timavgcsh_command=['timavg.csh', precision, '-mb','-o', outfile, infile]
     exitstatus=1
-
     with Popen(timavgcsh_command,
                stdout=PIPE, stderr=PIPE, shell=False) as subp:
         output=subp.communicate()[0]
@@ -108,11 +114,10 @@ def generate_frenctools_timavg(infile=None, outfile=None, do_weighted_avg=True, 
 
         if subp.returncode < 0:
             print('error')
-            exitstatus=1
         else:
             print('success')
             exitstatus=0
-
+    
     return exitstatus
 
 
@@ -123,7 +128,8 @@ def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
         print(f'outfile={outfile}')
         print(f'avg_type={avg_type}')
 
-    if all([avg_type!='all',avg_type!='seas',avg_type!='month']):
+    if all([avg_type!='all',avg_type!='seas',avg_type!='month',
+            avg_type is not None]):
         print(f'ERROR, avg_type requested unknown.')
         return 1
 
@@ -133,15 +139,15 @@ def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
     if avg_type == 'all':
         print(f'time-averaging requested.')
         _cdo.timmean(input=infile, output=outfile, returnCdf=True)
-        print(f'time averaging requested')
+        print(f'done averaging over all time.')
     elif avg_type == 'seas':
         print(f'seasonal time-averaging requested.')
         _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging over seasons')
+        print(f'done averaging over seasons.')
     elif avg_type == 'month':
         print(f'time-averaging requested.')
         _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging over months')
+        print(f'done averaging over months.')
     else:
         print(f'problem.')
         return 1
@@ -161,9 +167,9 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None):
     if   pkg == 'cdo'            :
         exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
     elif pkg == 'fre-nctools'    :
-        exitstatus=generate_frenctools_timavg(     infile=infile, outfile=outfile )
+        exitstatus=generate_frenctools_timavg(     infile=infile, outfile=outfile, avg_type=avg_type )
     elif pkg == 'fre-python-tools':
-        exitstatus=generate_frepythontools_timavg( infile=infile, outfile=outfile )
+        exitstatus=generate_frepythontools_timavg( infile=infile, outfile=outfile, avg_type=avg_type )
     else                         :
         print('requested package unknown. exit.')
         exitstatus=1
@@ -185,16 +191,22 @@ def main():
                           help='package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]',
                           type=str, default='cdo')
     argparser.add_argument('-a','--avg',
-                           help='type of time average to generate [e.g. month,seas,all]',
+                           help='type of time average to generate [e.g. month,seas,all].\n \
+                                 currently, fre-nctools and fre-python-tools pkg options\n \
+                                 do not support seasonal and monthly averaging.\n',
                           type=str, default='all')
     cli_args = argparser.parse_args()
-    generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg )
-
+    exitstatus=generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg )
+    if exitstatus!=0:
+        print(f'WARNING: exitstatus={exitstatus}!=0. Something exited poorly!')
+    else:
+        print(f'time averaging finished successfully')
 
 if __name__ == '__main__':
     import time
     import sys
     start_time=time.perf_counter()
-    main(sys.argv[1:])
+    #main(sys.argv)
+    main()
     finish_time=time.perf_counter()
     print(f'Finished in total time {round(finish_time - start_time , 2)} second(s)')
