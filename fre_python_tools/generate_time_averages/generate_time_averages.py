@@ -10,7 +10,7 @@ import numpy
 from netCDF4 import Dataset
 
 def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
-                                   do_weighted_avg=True, do_std_dev=True):
+                                   do_weighted_avg=True, do_std_dev=False):
     ''' my own time-averaging function. mostly an exercise. '''
     if __debug__:
         print('calling generate_frepythontools_timavg for file: ' + infile)
@@ -19,16 +19,17 @@ def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
         print(f'ERROR: avg_type={avg_type} is not supported by this function at this time.')
         return 1
 
-    var=infile.split('/').pop().split('.')[-2]
-    if __debug__:
-        print(f'var={var}')
-
     nc_fin = Dataset(infile, 'r')
+
+    nc_fin_var=infile.split('/').pop().split('.')[-2]
+    if __debug__:
+        print(f'nc_fin_var={nc_fin_var}')
+
 
     # check for the variable we're hoping is in the file
     fin_vars=nc_fin.variables
     for key in fin_vars:
-        if str(key)==var:
+        if str(key)==nc_fin_var:
             time_bnds=nc_fin['time_bnds'][:].copy()
             key_found=True
             break
@@ -52,45 +53,118 @@ def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
         stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
 
     # compute average, for each lat/lon coordinate over time record in file
+    count=0
+    COUNT_MAX_DEBUG=5
     for lon in range(lon_bnd):
         if lon%32 == 0:
             print(f'lon # {lon+1}/{lon_bnd}')
 
         for lat in range(lat_bnd):
-            val_array= numpy.moveaxis( nc_fin[var][:], 0, -1 )[lat][lon].copy()
+            count+=1
+            print(f'count={count}')
+            val_array= numpy.moveaxis( nc_fin[nc_fin_var][:], 0, -1 )[lat][lon].copy()
 
-            if do_weighted_avg:
-                time_bnd_sum = sum( (time_bnds[tim][1] - time_bnds[tim][0]) for tim in range(time_bnd))
-                avgvals[0][lat][lon]=sum( val_array[tim] * (
-                                                      time_bnds[tim][1]-time_bnds[tim][0]
-                                                              ) for tim in range(time_bnd) ) / time_bnd_sum
-
-                if do_std_dev: #std dev *of the mean*. not a vanilla std dev.
-                    stddevs[0][lat][lon]=math.sqrt(
-                                                 sum(
-                        (val_array[tim]-avgvals[0][lat][lon]) ** 2.
-                                                     for tim in range(time_bnd)
-                                                    )
-                                                  ) / time_bnd_sum
-
-            else: #unweighted average/stddev
-                avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
-                    val_array[tim] for tim in range(time_bnd)
-                                        ) / time_bnd
-
-                if do_std_dev:
-                    stddevs[0][lat][lon]=math.sqrt(
-                                                 sum(
-                                          (val_array[tim]-avgvals[0][lat][lon]) ** 2.
-                                                     for tim in range(time_bnd)
-                                                    ) / ( (time_bnd - 1. ) * time_bnd )
-                                                  )
+            #if do_weighted_avg:
+            time_bnd_sum = sum( (time_bnds[tim][1] - time_bnds[tim][0]) for tim in range(time_bnd))
+            avgvals[0][lat][lon]=sum( val_array[tim] * (
+                                                  time_bnds[tim][1]-time_bnds[tim][0]
+                                                          ) for tim in range(time_bnd) ) / time_bnd_sum
             del val_array
+            if count>COUNT_MAX_DEBUG: break
+        if count>COUNT_MAX_DEBUG: break
+                #if do_std_dev: #std dev *of the mean*. not a vanilla std dev.
+                #    stddevs[0][lat][lon]=math.sqrt(
+                #                                 sum(
+                #        (val_array[tim]-avgvals[0][lat][lon]) ** 2.
+                #                                     for tim in range(time_bnd)
+                #                                    )
+                #                                  ) / time_bnd_sum
+
+            #else: #unweighted average/stddev
+            #    avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
+            #        val_array[tim] for tim in range(time_bnd)
+            #                            ) / time_bnd
+            #
+            #    if do_std_dev:
+            #        stddevs[0][lat][lon]=math.sqrt(
+            #                                     sum(
+            #                              (val_array[tim]-avgvals[0][lat][lon]) ** 2.
+            #                                         for tim in range(time_bnd)
+            #                                        ) / ( (time_bnd - 1. ) * time_bnd )
+            #                                      )
+
 
 
     ## write output file here
-    nc_fout = Dataset( outfile, 'w',persist=True)
+    nc_fout = Dataset( outfile, 'w', format='NETCDF4', persist=True )
+
+    # write file dimensions
+    print('writing output dimensions.')
+    for key in fin_dims:
+        #print(f'key={key}')
+        if key=='time':
+            try:
+                nc_fout.createDimension( dimname='time', size=1 )
+            except:
+                print(f'problem. cannot read/write time dimensions')
+                return 1        
+        else:            
+            nc_fout.createDimension( dimname=key, size=fin_dims[key].size )
+
+    ## write output variables (aka data)
+    print('writing output variables.')
+    unwritten_var_list=[]
+    for var in fin_vars:
+    #    if var=='time':
+    #        nc_fout.createVariable('time',fin_vars['time'].dtype, ('time'))
+    #    else:
+        print(f'____________________________________________________________________________')
+        print(f'var={var}')
+        print(f'fin_vars[{var}].dtype={fin_vars[var].dtype}')
+        #print(f'fin_vars[{var}]={fin_vars[var]}')
+        print(f'fin_vars[{var}].dimensions={fin_vars[var].dimensions}')
+        print(f'          ------------------------------------------------------------      ')
+        
+        try:
+            if False:
+                print(f'trying to make this var={var} different.')
+            else:
+                print(f'\nattempting to create output variable: {var}')
+                #nc_fout.createVariable(var, fin_vars[var].dtype, (var))
+                nc_fout.createVariable(var, fin_vars[var].dtype, fin_vars[var].dimensions)
+                print(f'\nlooking at attributes of variable: {var}')
+                for ncattr in fin_vars[var].ncattrs():
+                    nc_fout.variables[var].setncattr(ncattr, fin_vars[var].getncattr(ncattr))
+                    print(f'ncattr={ncattr}')
+                    #print(f'{fin_vars[var].getncattr(ncattr)}')
+        except:
+            unwritten_var_list.append(var)
+            print(f'could not create output variable: {var}')
+    print(f'WARNING: unwritten_var_list={unwritten_var_list}')
+    
+    
+    ## write file global attributes
+    #print('writing output attributes.')
+    #fin_ncattrs=nc_fin.ncattrs()
+    #unwritten_ncattr_list=[]
+    #for ncattr in fin_ncattrs:
+    #    print(f'\n_________\nncattr={ncattr}')
+    #    try:
+    #        print(f'{repr(fin_ncattrs.getncattr(ncattr))}')
+    #    except:
+    #        print(f'could not get nc file attribute: {ncattr}')
+    #        unwritten_ncattr_list.append(ncattr)
+    #        #    if key=='time':
+    ##        nc_fout.createVariable( dimname='time', size=1 )
+    ##    else:
+    ##        nc_fout.createVariable( dimname=key, size=fin_dims[key].size)            
+    #print(f'WARNING: unwritten_ncattr_list={unwritten_ncattr_list}')
+        
+    
+
     nc_fout.close()
+    nc_fin.close()
+    print(f'wrote ouput file: {outfile}')
     return 0
 
 
