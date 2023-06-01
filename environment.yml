@@ -1,4 +1,4 @@
-name: fre-python-tools-PR2
+name: fre-python-tools-dev
 channels:
   - conda-forge
 dependencies:
