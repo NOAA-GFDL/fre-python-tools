@@ -183,7 +183,7 @@ def main():
                            type=str)
     argparser.add_argument('-p','--pkg',
                           help='package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]',
-                          type=str, default='fre-python-tools')
+                          type=str, default='cdo')
     argparser.add_argument('-a','--avg',
                            help='type of time average to generate [e.g. month,seas,all]',
                           type=str, default='all')
