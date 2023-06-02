@@ -28,6 +28,7 @@ if [ -f $TESFILE ] ; then
 	echo "--------------------------------------------------"	
 	echo "running fre-nctools timavg examples"	
 	fre_nctools_timavg_ex
+
 	return 0
 else
 	echo "failed to run CLI examples"
