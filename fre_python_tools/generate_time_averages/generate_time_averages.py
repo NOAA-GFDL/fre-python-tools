@@ -33,21 +33,19 @@ def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
     if not key_found:
         print('requested variable not found. exit.')
         return 1
+       
 
-
-    # check for mask (will be important for later dev stages)
+    # check for mask, adjust accordingly TO DO
     #is_masked = ma.is_masked(val_array)
 
     # read in sizes of specific axes
     fin_dims =nc_fin.dimensions
-    time_bnd=fin_dims['time'].size
+    N_time_bnds=fin_dims['time'].size
     if not unwgt: #compute sum of weights
-        wgts=numpy.zeros((time_bnd),dtype=float)
-        wgts_sum=0
-        for tim in range(time_bnd):
-            wgts_sum+=(time_bnds[tim][1] - time_bnds[tim][0])
-            wgts[tim]=time_bnds[tim][1]-time_bnds[tim][0]
-            print(f'wgts[{tim}]={wgts[tim]}')
+        wgts=numpy.moveaxis(time_bnds,0,-1)[1][:].copy() - numpy.moveaxis(time_bnds,0,-1)[0][:].copy()
+        wgts_sum=sum(wgts)
+        if __debug__:
+            print(f'wgts_sum={wgts_sum}')
 
 
     # initialize arrays
@@ -61,47 +59,42 @@ def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
         stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
 
     # compute average, for each lat/lon coordinate over time record in file
-    #count=0
-    #COUNT_MAX_DEBUG=15
     if not unwgt: #weighted case
         print(f'computing weighted statistics')
         for lat in range(lat_bnd):
             lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
-            #if (lat%3 == 0):
-            #    print(f'lat # {lat}/{lat_bnd}')
-            #count+=1
             
             for lon in range(lon_bnd):
-                tim_val_array= lon_val_array[lon].copy() #numpy.moveaxis( lon_val_array[:], 0, -1 )[lon].copy()
+                tim_val_array= lon_val_array[lon].copy() 
                 avgvals[0][lat][lon]=sum( (tim_val_array[tim] * wgts[tim] )
-                                          for tim in range(time_bnd) ) / wgts_sum
-                #print(f'avgvals[0][{lat}][{lon}]={avgvals[0][lat][lon]}')
-                #return 1
-                if stddev: #std dev *of the mean*. not a vanilla std dev.
+                                          for tim in range(N_time_bnds) ) / wgts_sum
+
+                if stddev: # use sample and/or estimated pop std. dev. 
                     stddevs[0][lat][lon]=math.sqrt(
                                                  sum( wgts[tim] *
                                                       (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
-                                                     for tim in range(time_bnd) )
-                                                  ) / wgts_sum
+                                                     for tim in range(N_time_bnds) )
+                                                  / wgts_sum )
                 del tim_val_array
             del lon_val_array
     else: #unweighted case
         print(f'computing unweighted statistics')
         for lat in range(lat_bnd):
             lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
+            
             for lon in range(lon_bnd):
-                tim_val_array= lon_val_array[lon].copy() #numpy.moveaxis( lon_val_array[:], 0, -1 )[lon].copy()
+                tim_val_array= lon_val_array[lon].copy() 
                 avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
-                    tim_val_array[tim] for tim in range(time_bnd)
-                                        ) / time_bnd
-                #print(f'avgvals[0][{lat}][{lon}]={avgvals[0][lat][lon]}')
-                #return 1
+                    tim_val_array[tim] for tim in range(N_time_bnds)
+                                        ) / N_time_bnds
+
                 if stddev:
+                    
                     stddevs[0][lat][lon]=math.sqrt(
                                                  sum(
                                           (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
-                                                     for tim in range(time_bnd)
-                                                    ) / ( (time_bnd - 1. ) * time_bnd )
+                                                     for tim in range(N_time_bnds)
+                                                    ) / ( (N_time_bnds - 1. ) )
                                                   )
                 del tim_val_array
             del lon_val_array
@@ -216,7 +209,8 @@ def generate_frenctools_timavg(infile=None, outfile=None, avg_type='all', do_wei
     return exitstatus
 
 
-def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
+def generate_cdo_timavg(infile=None, outfile=None, avg_type=None,
+                        unwgt=True, stddev=False):
     ''' use cdo's python module for time-averaging '''
     if __debug__:
         print(f'calling generate_cdo_timavg for file: {infile}')
@@ -230,21 +224,64 @@ def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
 
     from cdo import Cdo
     _cdo=Cdo()
+
+    N_time_bnds=-1
+    wgts_sum=0
+    if not unwgt: #weighted case, cdo ops alone don't support a weighted time-average.
+        from netCDF4 import Dataset
+        import numpy
+        
+        nc_fin = Dataset(infile, 'r')
+        time_bnds=nc_fin['time_bnds'][:].copy()
+        N_time_bnds=len(time_bnds)
+
+        wgts=numpy.moveaxis(time_bnds,0,-1)[1][:].copy() - numpy.moveaxis(time_bnds,0,-1)[0][:].copy()
+        wgts_sum=sum(wgts)
+
+        if __debug__:
+            print(f'wgts_sum={wgts_sum}')
+
+        nc_fin.close()
+        
+        
+
     
     if avg_type == 'all':
-        print(f'time-averaging requested.')
-        _cdo.timmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging over all time.')
+        if not stddev: 
+            print(f'time average over all time requested.')
+            if unwgt:
+                _cdo.timmean(input=infile, output=outfile, returnCdf=True)
+            else:
+                _cdo.divc( str(wgts_sum), input="-timsum -muldpm "+infile, output=outfile)
+                
+            print(f'done averaging over all time.')
+        else:
+            print(f'time standard-deviation (N-1) over all time requested.')
+            _cdo.timstd1(input=infile, output=outfile, returnCdf=True)
+            print(f'done computing standard-deviation over all time.')
+            
     elif avg_type == 'seas':
-        print(f'seasonal time-averaging requested.')
-        _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging over seasons.')
+        if not stddev:
+            print(f'seasonal time-averages requested.')
+            _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
+            print(f'done averaging over seasons.')
+        else:
+            print(f'seasonal time standard-deviation (N-1) requested.')
+            _cdo.yseasstd1(input=infile, output=outfile, returnCdf=True)
+            print(f'done averaging over seasons.')
+            
     elif avg_type == 'month':
-        print(f'time-averaging requested.')
-        _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
-        print(f'done averaging over months.')
+        if not stddev:
+            print(f'monthly time-averages requested.')
+            _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
+            print(f'done averaging over months.')
+        else:
+            print(f'monthly time standard-deviation (N-1) requested.')
+            _cdo.ymonstd1(input=infile, output=outfile, returnCdf=True)
+            print(f'done averaging over months.')
+            
     else:
-        print(f'problem.')
+        print(f'problem: unknown avg_type={avg_type}')
         return 1
 
     print(f'done averaging')
@@ -253,8 +290,6 @@ def generate_cdo_timavg(infile=None, outfile=None, avg_type=None):
 
 
 def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,unwgt=False,stddev=False):
-    #print(f'unwgt={unwgt}, stddev={stddev}')
-    #return 1
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
@@ -262,11 +297,13 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,unw
 
     #needs a case statement
     if   pkg == 'cdo'            :
-        exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile, avg_type=avg_type )
+        exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile,
+                                                   avg_type=avg_type , unwgt=unwgt, stddev=stddev )
     elif pkg == 'fre-nctools'    :
         exitstatus=generate_frenctools_timavg(     infile=infile, outfile=outfile, avg_type=avg_type )
     elif pkg == 'fre-python-tools':
-        exitstatus=generate_frepythontools_timavg( infile=infile, outfile=outfile, avg_type=avg_type , unwgt=unwgt, stddev=stddev)
+        exitstatus=generate_frepythontools_timavg( infile=infile, outfile=outfile,
+                                                   avg_type=avg_type , unwgt=unwgt, stddev=stddev)
     else                         :
         print('requested package unknown. exit.')
         exitstatus=1
@@ -309,7 +346,6 @@ def main():
 if __name__ == '__main__':
     import time
     start_time=time.perf_counter()
-    #main(sys.argv)
     main()
     finish_time=time.perf_counter()
     print(f'Finished in total time {round(finish_time - start_time , 2)} second(s)')
