@@ -180,34 +180,6 @@ def generate_frepythontools_timavg(infile=None, outfile=None, avg_type='all',
     return 0
 
 
-# must have fre-nctools, which is not included in the conda env by default.
-def generate_frenctools_timavg(infile=None, outfile=None, avg_type='all', do_weighted_avg=True, do_std_dev=True):
-    ''' use fre-nctool's CLI timavg.csh with subprocess call '''
-    if __debug__:
-        print(f'calling generate_frenctools_timavg for file: {infile}')
-    exitstatus=1
-    if avg_type!='all':
-        print(f'ERROR: avg_type={avg_type} is not supported by this function at this time.')
-        return exitstatus
-
-    from subprocess import Popen, PIPE
-
-    precision='-r8'
-    timavgcsh_command=['timavg.csh', precision, '-mb','-o', outfile, infile]
-    exitstatus=1
-    with Popen(timavgcsh_command,
-               stdout=PIPE, stderr=PIPE, shell=False) as subp:
-        output=subp.communicate()[0]
-        print(f'output={output}')
-
-        if subp.returncode < 0:
-            print('error')
-        else:
-            print('success')
-            exitstatus=0
-    
-    return exitstatus
-
 
 def generate_cdo_timavg(infile=None, outfile=None, avg_type=None,
                         unwgt=True, stddev=False):
@@ -289,25 +261,45 @@ def generate_cdo_timavg(infile=None, outfile=None, avg_type=None,
     return 0
 
 
-def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,unwgt=False,stddev=False):
+def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,unwgt=False,stddev=False,stddev_type=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
     exitstatus=1
 
     #needs a case statement
+    myavger=None
     if   pkg == 'cdo'            :
-        exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile,
-                                                   avg_type=avg_type , unwgt=unwgt, stddev=stddev )
+        #exitstatus=generate_cdo_timavg(            infile=infile, outfile=outfile,
+        #                                           avg_type=avg_type , unwgt=unwgt, stddev=stddev )
+        from .cdoTimeAverager import cdoTimeAverager
+        myavger=cdoTimeAverager(pkg=pkg, avg_type=avg_type,                       
+                                unwgt=unwgt,stddev=stddev,stddev_type=stddev_type)
+        if __debug__:
+            print(f'myavger.__repr__={myavger.__repr__}')
+
+
+        
     elif pkg == 'fre-nctools'    :
-        exitstatus=generate_frenctools_timavg(     infile=infile, outfile=outfile, avg_type=avg_type )
+        from .frenctoolsTimeAverager import frenctoolsTimeAverager
+        myavger=frenctoolsTimeAverager(pkg=pkg, avg_type=avg_type,                       
+                                       unwgt=unwgt,stddev=stddev,stddev_type=stddev_type)
+        if __debug__:
+            print(f'myavger.__repr__={myavger.__repr__}')
+        #exitstatus=myavger.generate_timavg( infile=infile, outfile=outfile )
+        
     elif pkg == 'fre-python-tools':
         exitstatus=generate_frepythontools_timavg( infile=infile, outfile=outfile,
                                                    avg_type=avg_type , unwgt=unwgt, stddev=stddev)
     else                         :
         print('requested package unknown. exit.')
-        exitstatus=1
+        return exitstatus
 
+    if myavger is not None:
+        exitstatus=myavger.generate_timavg(infile=infile, outfile=outfile)
+    else:
+        print(f'ERROR: averager is None, check generate_time_average in generate_time_averages.py!')
+        
     return exitstatus
 
 def main():
@@ -335,9 +327,14 @@ def main():
     argparser.add_argument('-s','--stddev',
                            help='compute standard deviations for time-averages as well.',
                            action='store_true', default=False)
+#    argparser.add_argument('-z','--stddev-type',#change the single-letter flag...
+#                           help='specify type of stddev to compute [population, sample]. \ 
+#                                 this option is meaningless/ignored unless unweighted statistics are requested',
+#                           type=str, default=None)
     cli_args = argparser.parse_args()
     exitstatus=generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg ,
-                                      cli_args.unwgt, cli_args.stddev)
+                                      cli_args.unwgt, cli_args.stddev, stddev_type=None)
+ #                                     cli_args.unwgt, cli_args.stddev, cli_args.stddev_type)
     if exitstatus!=0:
         print(f'WARNING: exitstatus={exitstatus}!=0. Something exited poorly!')
     else:
