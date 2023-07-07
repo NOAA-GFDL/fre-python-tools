@@ -10,10 +10,11 @@ class cdoTimeAverager(timeAverager):
         if __debug__:
             print(f'calling generate_cdo_timavg for file: {infile}')
             print(f'outfile={outfile}')
-            print(f'avg_type={avg_type}')
+            print(f'stddev_type={self.stddev_type}')
+            print(f'avg_type={self.avg_type}')
                 
-        if all([avg_type!='all',avg_type!='seas',avg_type!='month',
-                avg_type is not None]):
+        if all([self.avg_type!='all',self.avg_type!='seas',self.avg_type!='month',
+                self.avg_type is not None]):
             print(f'ERROR, avg_type requested unknown.')
             return 1
 
@@ -22,7 +23,7 @@ class cdoTimeAverager(timeAverager):
         
         N_time_bnds=-1
         wgts_sum=0
-        if not unwgt: #weighted case, cdo ops alone don't support a weighted time-average.
+        if not self.unwgt: #weighted case, cdo ops alone don't support a weighted time-average.
             from netCDF4 import Dataset
             import numpy
             
@@ -38,10 +39,10 @@ class cdoTimeAverager(timeAverager):
                 
                 nc_fin.close()
                 
-        if avg_type == 'all':
-            if not stddev: 
+        if self.avg_type == 'all':
+            if not self.stddev: 
                 print(f'time average over all time requested.')
-                if unwgt:
+                if self.unwgt:
                     _cdo.timmean(input=infile, output=outfile, returnCdf=True)
                 else:
                     _cdo.divc( str(wgts_sum), input="-timsum -muldpm "+infile, output=outfile)
@@ -52,8 +53,8 @@ class cdoTimeAverager(timeAverager):
                 _cdo.timstd1(input=infile, output=outfile, returnCdf=True)
                 print(f'done computing standard-deviation over all time.')
             
-        elif avg_type == 'seas':
-            if not stddev:
+        elif self.avg_type == 'seas':
+            if not self.stddev:
                 print(f'seasonal time-averages requested.')
                 _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
                 print(f'done averaging over seasons.')
@@ -62,8 +63,8 @@ class cdoTimeAverager(timeAverager):
                 _cdo.yseasstd1(input=infile, output=outfile, returnCdf=True)
                 print(f'done averaging over seasons.')
             
-        elif avg_type == 'month':
-            if not stddev:
+        elif self.avg_type == 'month':
+            if not self.stddev:
                 print(f'monthly time-averages requested.')
                 _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
                 print(f'done averaging over months.')
@@ -73,7 +74,7 @@ class cdoTimeAverager(timeAverager):
                 print(f'done averaging over months.')
             
         else:
-            print(f'problem: unknown avg_type={avg_type}')
+            print(f'problem: unknown avg_type={self.avg_type}')
             return 1
         
         print(f'done averaging')
