@@ -21,9 +21,8 @@ jobs:
     - name: build environment
       run: |
         #conda env update --file environment.yml --name base
-        conda deactivate
         conda env create --file environment.yml
-        conda activate fre-python-tools-dev
+        conda activate --no-stack fre-python-tools-dev
         conda list
         pwd
         ls
