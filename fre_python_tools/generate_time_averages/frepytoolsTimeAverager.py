@@ -22,6 +22,9 @@ class frepytoolsTimeAverager(timeAverager):
         from netCDF4 import Dataset
     
         nc_fin = Dataset(infile, 'r')
+        if nc_fin.file_format != 'NETCDF4':
+            print(f'INFO: input file is not netCDF4 format, is {nc_fin.file_format}')
+
         
         nc_fin_var=infile.split('/').pop().split('.')[-2]
         if __debug__:
@@ -63,112 +66,113 @@ class frepytoolsTimeAverager(timeAverager):
             print(f'computing std. deviations')
             stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
 
-        # compute average, for each lat/lon coordinate over time record in file
-        if not self.unwgt: #weighted case
-            print(f'computing weighted statistics')
-            for lat in range(lat_bnd):
-                lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
-            
-                for lon in range(lon_bnd):
-                    tim_val_array= lon_val_array[lon].copy() 
-                    avgvals[0][lat][lon]=sum( (tim_val_array[tim] * wgts[tim] )
-                                              for tim in range(N_time_bnds) ) / wgts_sum
+        if True:
+            # compute average, for each lat/lon coordinate over time record in file
+            if not self.unwgt: #weighted case
+                print(f'computing weighted statistics')
+                for lat in range(lat_bnd):
+                    lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
+                    
+                    for lon in range(lon_bnd):
+                        tim_val_array= lon_val_array[lon].copy() 
+                        avgvals[0][lat][lon]=sum( (tim_val_array[tim] * wgts[tim] )
+                                                  for tim in range(N_time_bnds) ) / wgts_sum
 
-                    if self.stddev: # use sample and/or estimated pop std. dev. 
-                        stddevs[0][lat][lon]=math.sqrt(
+                        if self.stddev: # use sample and/or estimated pop std. dev. 
+                            stddevs[0][lat][lon]=math.sqrt(
                                                  sum( wgts[tim] *
                                                       (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
                                                       for tim in range(N_time_bnds) )
                                                   / wgts_sum )
-                    del tim_val_array
-                del lon_val_array
-        else: #unweighted case
-            print(f'computing unweighted statistics')
-            for lat in range(lat_bnd):
-                lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
+                        del tim_val_array
+                    del lon_val_array
+            else: #unweighted case
+                print(f'computing unweighted statistics')
+                for lat in range(lat_bnd):
+                    lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
                 
-                for lon in range(lon_bnd):
-                    tim_val_array= lon_val_array[lon].copy() 
-                    avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
-                        tim_val_array[tim] for tim in range(N_time_bnds)
+                    for lon in range(lon_bnd):
+                        tim_val_array= lon_val_array[lon].copy() 
+                        avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
+                            tim_val_array[tim] for tim in range(N_time_bnds)
                                    ) / N_time_bnds
 
-                    if self.stddev:
+                        if self.stddev:
                     
-                        stddevs[0][lat][lon]=math.sqrt(
+                            stddevs[0][lat][lon]=math.sqrt(
                                                           sum(
                                                               (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
                                                               for tim in range(N_time_bnds)
                                                           ) / ( (N_time_bnds - 1. ) )
                                                                )
-                    del tim_val_array
-                del lon_val_array
+                        del tim_val_array
+                    del lon_val_array
 
         # write output file
         #with Dataset( outfile, 'w', format='NETCDF4', persist=True ) as nc_fout:
-        nc_fout= Dataset( outfile, 'w', format='NETCDF4', persist=True )
+        #nc_fout= Dataset( outfile, 'w', format='NETCDF4', persist=True )
+        nc_fout= Dataset( outfile, 'w', format=nc_fin.file_format, persist=True )
         
-        # write file dimensions
-        print('\nwriting output dimensions.')
-        for key in fin_dims:
-            #print(f'key={key}')
-            if key=='time':
+        # write file global attributes
+        print('------- writing output attributes. --------')
+        #fin_ncattrs=nc_fin.ncattrs()
+        unwritten_ncattr_list=[]
+        try:
+            nc_fout.setncatts(nc_fin.__dict__) #this copies the global attributes exactly.
+        except:
+            print('could not copy attributes from input file. now trying to copy attribute-by-attribute.')
+            for ncattr in fin_ncattrs:
+                print(f'\n_________\nncattr={ncattr}')
                 try:
-                    nc_fout.createDimension( dimname='time', size=1 )
+                    nc_fout.setncattr(ncattr, nc_fin.getncattr(ncattr))
                 except:
-                    print(f'problem. cannot read/write time dimensions')
-                    return 1        
-            else:            
-                nc_fout.createDimension( dimname=key, size=fin_dims[key].size )
-        print('done writing output dimensions.\n')
+                    print(f'could not get nc file attribute: {ncattr}. moving on.')
+                    unwritten_ncattr_list.append(ncattr)
+        if len(unwritten_ncattr_list)>0:
+            print(f'WARNING: unwritten_ncattr_list={unwritten_ncattr_list}')
+        print('------- DONE writing output attributes. --------')
+
+
+        # write file dimensions
+        print('\n ------ writing output dimensions. ------ ')
+        unwritten_dims_list=[]
+        for key in fin_dims:
+            try:
+                if key=='time':                    
+                    nc_fout.createDimension( dimname=key, size=None )
+                else:
+                    nc_fout.createDimension( dimname=key, size=fin_dims[key].size )
+            except:
+                print(f'problem. cannot read/write dimension {key}')
+                unwritten_dims_list.append(key)
+        if len(unwritten_dims_list)>0:
+            print(f'WARNING: unwritten_dims_list={unwritten_dims_list}')
+        print('------ DONE writing output dimensions. ------- \n')
         ##
         
-        # write output variables (aka data)
-        print('\nwriting output variables.')
+        # write output variables (aka data) #prev code.
+        print('\n------- writing output variables. -------- ')
         unwritten_var_list=[]
+        unwritten_var_ncattr_dict={}
         for var in fin_vars:
             print(f'\nattempting to create output variable: {var}')    #nc_fout.createVariable(var, fin_vars[var].dtype, (var))
-            try:
-                nc_fout.createVariable(var, fin_vars[var].dtype, fin_vars[var].dimensions)
-                if var ==nc_fin_var:#our averaged variable
-                    nc_fout.variables[var][:]=avgvals
-                    if self.stddev:
-                        nc_fout.createVariable(var+'_stddev', fin_vars[var].dtype, fin_vars[var].dimensions)
-                        nc_fout.variables[var+'_stddev'][:]=stddevs
-                print(f'\nlooking at attributes of variable: {var}')
-                for ncattr in fin_vars[var].ncattrs():
-                    print(f'ncattr={ncattr}')
-                    try: nc_fout.variables[var].setncattr(ncattr, fin_vars[var].getncattr(ncattr))
-                    except: print(f'could not read var={var} ncattr={ncattr}')
-            except:
-                unwritten_var_list.append(var)
-                print(f'WARNING: could not create output variable: {var}')
-                print(f'____________________________________________________________________________')
-                print(f'var={var}')
-                print(f'fin_vars[{var}].dtype={fin_vars[var].dtype}')
-                print(f'fin_vars[{var}]={fin_vars[var]}')
-                print(f'fin_vars[{var}].dimensions={fin_vars[var].dimensions}')
-                print(f'          ------------------------------------------------------------      ')
-        print('done writing output variables.')
+            nc_fout.createVariable(var, nc_fin[var].dtype, nc_fin[var].dimensions)
+            nc_fout.variables[var].setncatts(nc_fin[var].__dict__)
+            if var != nc_fin_var:
+                nc_fout.variables[var][:] = nc_fin[var][:].copy()
+            else:
+                nc_fout.variables[var][:] = avgvals
+                
+            
+        if len(unwritten_var_list)>0:
+            print(f'WARNING: unwritten_var_list={unwritten_var_list}')
+        print(f'unwritten_var_ncattr_dict={unwritten_var_ncattr_dict}')
+        print('---------- DONE writing output variables. ---------')
         ##
 
 
 
-        # write file global attributes
-        print('writing output attributes.')
-        fin_ncattrs=nc_fin.ncattrs()
-        unwritten_ncattr_list=[]
-        for ncattr in fin_ncattrs:
-            print(f'\n_________\nncattr={ncattr}')
-            try:
-                print(f'{repr(fin_ncattrs.getncattr(ncattr))}')
-            except:
-                print(f'could not get nc file attribute: {ncattr}')
-                unwritten_ncattr_list.append(ncattr)
-        #    if key=='time':
-        #        nc_fout.createVariable( dimname='time', size=1 )
-        #    else:
-        #        nc_fout.createVariable( dimname=key, size=fin_dims[key].size)            
+
         
     
 
@@ -177,11 +181,7 @@ class frepytoolsTimeAverager(timeAverager):
         #close input file
         nc_fin.close()
         print(f'wrote ouput file: {outfile}')
-        if len(unwritten_var_list)>0:
-            print(f'WARNING: unwritten_var_list={unwritten_var_list}')
-        if len(unwritten_ncattr_list)>0:
-            print(f'WARNING: unwritten_ncattr_list={unwritten_ncattr_list}')
-            
+
         return 0
 
 
