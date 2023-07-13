@@ -2,9 +2,9 @@ name: fre-python-tools-dev
 channels:
   - conda-forge
 dependencies:
-  - python>=3.6 # oldest python officially supported security-wise
-  - cdo
-  - python-cdo
+  - python=3.10
+  - cdo=2.2.0
+  - python-cdo=1.6.0
   - cmor
   - xarray
   - metomi-isodatetime
