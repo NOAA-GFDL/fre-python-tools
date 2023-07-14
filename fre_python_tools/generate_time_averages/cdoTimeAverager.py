@@ -18,7 +18,10 @@ class cdoTimeAverager(timeAverager):
             print(f'ERROR, avg_type requested unknown.')
             return 1
 
+        import cdo
+        print(f'python-cdo version is {cdo.__version__}')
         from cdo import Cdo
+        
         _cdo=Cdo()
         
         N_time_bnds=-1
