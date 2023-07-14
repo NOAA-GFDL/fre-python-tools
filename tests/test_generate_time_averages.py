@@ -12,7 +12,7 @@ def test_time_avg_input_file_exists():
 
 
 ### cdo avgs, unweighted, all/seasonal/monthly ------------------------
-def test_monthly_python_cdo_time_unwgt_avgs():
+def test_monthly_cdo_time_unwgt_avgs():
     ''' generates an unweighted monthly time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     monthly_outfile=time_avg_file_dir+'ymonmean_unwgt_'+test_file_name
@@ -25,7 +25,7 @@ def test_monthly_python_cdo_time_unwgt_avgs():
     gtas.generate_time_average(pkg='cdo', infile=infile, outfile=monthly_outfile, avg_type='month', unwgt=True)
     assert pl.Path(monthly_outfile).exists()
 
-def test_seasonal_python_cdo_time_unwgt_avgs():
+def test_seasonal_cdo_time_unwgt_avgs():
     ''' generates an unweighted seasonal time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     seasonal_outfile=time_avg_file_dir+'yseasmean_unwgt_'+test_file_name
@@ -38,7 +38,7 @@ def test_seasonal_python_cdo_time_unwgt_avgs():
     gtas.generate_time_average(pkg='cdo', infile=infile, outfile=seasonal_outfile, avg_type='seas', unwgt=True)
     assert pl.Path(seasonal_outfile).exists()
 
-def test_python_cdo_time_unwgt_avgs():
+def test_cdo_time_unwgt_avgs():
     ''' generates an unweighted time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     all_outfile=time_avg_file_dir+'timmean_unwgt_'+test_file_name
@@ -54,10 +54,10 @@ def test_python_cdo_time_unwgt_avgs():
 
 ### cdo avgs, weighted, all/seasonal/monthly ------------------------
 # TO DO: MAKE THESE
-#def test_monthly_python_cdo_time_avgs(): 
-#def test_seasonal_python_cdo_time_avgs():
+#def test_monthly_cdo_time_avgs():
+#def test_seasonal_cdo_time_avgs():
 
-def test_python_cdo_time_avgs():
+def test_cdo_time_avgs():
     ''' generates a weighted time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     all_outfile=time_avg_file_dir+'timmean_'+test_file_name
@@ -72,7 +72,7 @@ def test_python_cdo_time_avgs():
 
 
 ### cdo stddevs, unweighted, all/seasonal/monthly ------------------------
-def test_monthly_python_cdo_time_unwgt_stddevs():
+def test_monthly_cdo_time_unwgt_stddevs():
     ''' generates a monthly time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     monthly_outfile=time_avg_file_dir+'ymonstddev1_unwgt_'+test_file_name
@@ -85,7 +85,7 @@ def test_monthly_python_cdo_time_unwgt_stddevs():
     gtas.generate_time_average(pkg='cdo', infile=infile, outfile=monthly_outfile, avg_type='month', stddev=True)
     assert pl.Path(monthly_outfile).exists()
 
-def test_seasonal_python_cdo_time_unwgt_stddevs():
+def test_seasonal_cdo_time_unwgt_stddevs():
     ''' generates a seasonal time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     seasonal_outfile=time_avg_file_dir+'yseasstddev1_unwgt_'+test_file_name
@@ -98,7 +98,7 @@ def test_seasonal_python_cdo_time_unwgt_stddevs():
     gtas.generate_time_average(pkg='cdo', infile=infile, outfile=seasonal_outfile, avg_type='seas', stddev=True)
     assert pl.Path(seasonal_outfile).exists()
 
-def test_python_cdo_time_unwgt_stddevs():
+def test_cdo_time_unwgt_stddevs():
     ''' generates a time averaged file using cdo '''
     infile =time_avg_file_dir+test_file_name
     all_outfile=time_avg_file_dir+'timstddev1_unwgt_'+test_file_name

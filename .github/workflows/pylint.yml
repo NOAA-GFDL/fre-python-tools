@@ -21,8 +21,8 @@ jobs:
     - name: pylint generate_time_averages
       continue-on-error: true
       run: |
-          pylint --disable too-few-public-methods --disable too-many-arguments --module-naming-style camelCase --clear-cache-post-run y $(git ls-files 'fre_python_tools/generate_time_averages/*.py')
+          pylint --disable too-few-public-methods --disable too-many-arguments --class-naming-style camelCase --clear-cache-post-run y $(git ls-files 'fre_python_tools/generate_time_averages/*.py')
     - name: pylint cmor_mixer
       continue-on-error: true
       run: |
-          pylint $(git ls-files 'fre_python_tools/cmor_mixer/*.py')
+          pylint --clear-cache-post-run y $(git ls-files 'fre_python_tools/cmor_mixer/*.py')

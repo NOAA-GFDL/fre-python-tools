@@ -33,7 +33,7 @@ class timeAverager:
                                stddev={self.stddev}, \
                                stddev_type={self.stddev_type})'
 
-    # this is here as a hint: this function is to be defined by classes inheriting from this abstract one.
-    # this function is never to be fully defined here by design.
     def generate_timavg(self, infile=None, outfile=None):
+        '''# this is a hint: this is to be defined by classes inheriting from the abstract one
+        this function is never to be fully defined here by design.'''
         raise NotImplementedError()

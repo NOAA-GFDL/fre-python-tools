@@ -65,9 +65,9 @@ def main():
                            help='compute standard deviations for time-averages as well.',
                            action='store_true', default=False)
     argparser.add_argument('-st', '--stddev-type',
-                                 help='specify type of stddev to compute [pop, samp, meanpop, meansamp].\n \
-                                       this option is meaningless/ignored unless unweighted statistics \n \
-                                       are requested. this functionality is still under construction.\n',
+                                 help='stddev type [pop, samp, meanpop, meansamp].\n \
+                                       option is ignored unless --unwgt/-u is specified. \n \
+                                       this functionality is still under construction.\n',
                            type=str, default=None)
     cli_args = argparser.parse_args()
     exitstatus=generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg_type ,

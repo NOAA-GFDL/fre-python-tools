@@ -18,7 +18,7 @@ class frenctoolsTimeAverager(timeAverager):
 #    def just_say_hello(self): #self is req'd as an arg here. b.c. it always get's passed, unless...
 #        print('HELLOOOOO CLASSES!!!!')
 #
-#    @staticmethod # you use a static method signified, so self isn't passed as an arg automatically.
+#    @staticmethod # you use a static method signified, so self isn't passed as an arg automatically
 #    def just_say_hello2():
 #        print('(static) HELLOOOOO CLASSES!!!!')
 
