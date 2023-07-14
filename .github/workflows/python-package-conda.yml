@@ -21,6 +21,7 @@ jobs:
     - name: build environment
       run: |
         conda env update --file environment.yml --name base
+        conda list
         pwd
         ls
         pip install .
