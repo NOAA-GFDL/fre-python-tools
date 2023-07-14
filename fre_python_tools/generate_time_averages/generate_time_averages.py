@@ -35,7 +35,7 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,
     if myavger is not None:
         exitstatus=myavger.generate_timavg(infile=infile, outfile=outfile)
     else:
-        print(f'ERROR: averager is None, check generate_time_average in generate_time_averages.py!')
+        print('ERROR: averager is None, check generate_time_average in generate_time_averages.py!')
 
     return exitstatus
 
@@ -51,7 +51,7 @@ def main():
                            help='output file name',
                            type=str)
     argparser.add_argument('-p','--pkg',
-                          help='package to use for timavg [e.g. cdo, fre-nctools, fre-python-tools]',
+                          help='time average approach [cdo, fre-nctools, fre-python-tools]',
                           type=str, default='cdo')
     argparser.add_argument('-a','--avg-type',
                            help='type of time average to generate [e.g. month,seas,all].\n \
@@ -66,16 +66,16 @@ def main():
                            action='store_true', default=False)
     argparser.add_argument('-st', '--stddev-type',
                                  help='specify type of stddev to compute [pop, samp, meanpop, meansamp].\n \
-                                 this option is meaningless/ignored unless unweighted statistics are requested.\n \
-                                 this functionality is still under construction.\n',
+                                       this option is meaningless/ignored unless unweighted statistics \n \
+                                       are requested. this functionality is still under construction.\n',
                            type=str, default=None)
     cli_args = argparser.parse_args()
     exitstatus=generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg_type ,
                                       cli_args.unwgt, cli_args.stddev, cli_args.stddev_type)
     if exitstatus!=0:
-        print(f'WARNING: exitstatus={exitstatus}!=0. Something exited poorly!')
+        print(f'WARNING: exitstatus={exitstatus} != 0. Something exited poorly!')
     else:
-        print(f'time averaging finished successfully')
+        print('time averaging finished successfully')
 
 if __name__ == '__main__':
     import time

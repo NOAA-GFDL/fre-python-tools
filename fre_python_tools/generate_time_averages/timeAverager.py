@@ -1,3 +1,5 @@
+''' core class structure for this module.'''
+
 class timeAverager:
     '''
     abstract base class for generating time averages + related statistical quantities

@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.10", "3.11"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -21,7 +21,7 @@ jobs:
     - name: pylint generate_time_averages
       continue-on-error: true
       run: |
-        pylint $(git ls-files 'fre_python_tools/generate_time_averages/*.py')
+          pylint --disable too-few-public-methods --disable too-many-arguments --module-naming-style camelCase --clear-cache-post-run y $(git ls-files 'fre_python_tools/generate_time_averages/*.py')
     - name: pylint cmor_mixer
       continue-on-error: true
       run: |

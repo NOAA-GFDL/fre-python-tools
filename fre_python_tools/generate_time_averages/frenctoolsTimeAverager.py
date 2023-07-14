@@ -70,3 +70,4 @@ class frenctoolsTimeAverager(timeAverager):
                 exitstatus=0
 
         return exitstatus
+''' class for utilizing timavg.csh (aka script to TAVG fortran exe) in frenc-tools '''
