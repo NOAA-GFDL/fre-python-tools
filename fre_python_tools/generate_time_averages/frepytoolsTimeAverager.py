@@ -12,7 +12,7 @@ class frepytoolsTimeAverager(timeAverager):
         ''' my own time-averaging function. mostly an exercise. '''
         if __debug__:
             print('calling generate_frepythontools_timavg for file: ' + infile)
-            
+
         if self.avg_type!='all':
             print(f'ERROR: avg_type={self.avg_type} is not supported by this function at this time.')
             return 1
@@ -20,16 +20,16 @@ class frepytoolsTimeAverager(timeAverager):
         import math
         import numpy
         from netCDF4 import Dataset
-    
+
         nc_fin = Dataset(infile, 'r')
         if nc_fin.file_format != 'NETCDF4':
             print(f'INFO: input file is not netCDF4 format, is {nc_fin.file_format}')
 
-        
+
         nc_fin_var=infile.split('/').pop().split('.')[-2]
         if __debug__:
             print(f'nc_fin_var={nc_fin_var}')
-            
+
 
         # check for the variable we're hoping is in the file
         fin_vars=nc_fin.variables
@@ -41,7 +41,7 @@ class frepytoolsTimeAverager(timeAverager):
         if not key_found:
             print('requested variable not found. exit.')
             return 1
-       
+
 
         # check for mask, adjust accordingly TO DO
         #is_masked = ma.is_masked(val_array)
@@ -72,13 +72,13 @@ class frepytoolsTimeAverager(timeAverager):
                 print(f'computing weighted statistics')
                 for lat in range(lat_bnd):
                     lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
-                    
+
                     for lon in range(lon_bnd):
-                        tim_val_array= lon_val_array[lon].copy() 
+                        tim_val_array= lon_val_array[lon].copy()
                         avgvals[0][lat][lon]=sum( (tim_val_array[tim] * wgts[tim] )
                                                   for tim in range(N_time_bnds) ) / wgts_sum
 
-                        if self.stddev: # use sample and/or estimated pop std. dev. 
+                        if self.stddev: # use sample and/or estimated pop std. dev.
                             stddevs[0][lat][lon]=math.sqrt(
                                                  sum( wgts[tim] *
                                                       (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
@@ -90,15 +90,15 @@ class frepytoolsTimeAverager(timeAverager):
                 print(f'computing unweighted statistics')
                 for lat in range(lat_bnd):
                     lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
-                
+
                     for lon in range(lon_bnd):
-                        tim_val_array= lon_val_array[lon].copy() 
+                        tim_val_array= lon_val_array[lon].copy()
                         avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
                             tim_val_array[tim] for tim in range(N_time_bnds)
                                    ) / N_time_bnds
 
                         if self.stddev:
-                    
+
                             stddevs[0][lat][lon]=math.sqrt(
                                                           sum(
                                                               (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
@@ -112,7 +112,7 @@ class frepytoolsTimeAverager(timeAverager):
         #with Dataset( outfile, 'w', format='NETCDF4', persist=True ) as nc_fout:
         #nc_fout= Dataset( outfile, 'w', format='NETCDF4', persist=True )
         nc_fout= Dataset( outfile, 'w', format=nc_fin.file_format, persist=True )
-        
+
         # write file global attributes
         print('------- writing output attributes. --------')
         #fin_ncattrs=nc_fin.ncattrs()
@@ -138,7 +138,7 @@ class frepytoolsTimeAverager(timeAverager):
         unwritten_dims_list=[]
         for key in fin_dims:
             try:
-                if key=='time':                    
+                if key=='time':
                     nc_fout.createDimension( dimname=key, size=None )
                 else:
                     nc_fout.createDimension( dimname=key, size=fin_dims[key].size )
@@ -149,7 +149,7 @@ class frepytoolsTimeAverager(timeAverager):
             print(f'WARNING: unwritten_dims_list={unwritten_dims_list}')
         print('------ DONE writing output dimensions. ------- \n')
         ##
-        
+
         # write output variables (aka data) #prev code.
         print('\n------- writing output variables. -------- ')
         unwritten_var_list=[]
@@ -162,8 +162,8 @@ class frepytoolsTimeAverager(timeAverager):
                 nc_fout.variables[var][:] = nc_fin[var][:].copy()
             else:
                 nc_fout.variables[var][:] = avgvals
-                
-            
+
+
         if len(unwritten_var_list)>0:
             print(f'WARNING: unwritten_var_list={unwritten_var_list}')
         print(f'unwritten_var_ncattr_dict={unwritten_var_ncattr_dict}')
@@ -173,8 +173,8 @@ class frepytoolsTimeAverager(timeAverager):
 
 
 
-        
-    
+
+
 
 
         nc_fout.close()
@@ -183,6 +183,3 @@ class frepytoolsTimeAverager(timeAverager):
         print(f'wrote ouput file: {outfile}')
 
         return 0
-
-
-

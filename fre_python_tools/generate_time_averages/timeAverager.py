@@ -1,7 +1,7 @@
 class timeAverager:
     '''
     abstract base class for generating time averages + related statistical quantities
-    this class must be inherited by another for functionality. 
+    this class must be inherited by another for functionality.
     '''
     pkg: str
     avg_type: str
@@ -23,7 +23,7 @@ class timeAverager:
         self.unwgt = unwgt
         self.stddev = stddev
         self.stddev_type = stddev_type
-        
+
     def __repr__(self):
         return f'{type(self).__name__}( pkg={self.pkg}, \
                                avg_type={self.avg_type}, \
@@ -34,4 +34,4 @@ class timeAverager:
     # this is here as a hint: this function is to be defined by classes inheriting from this abstract one.
     # this function is never to be fully defined here by design.
     def generate_timavg(self, infile=None, outfile=None):
-        raise NotImplementedError() 
+        raise NotImplementedError()
