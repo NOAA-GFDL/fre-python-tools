@@ -1,3 +1,4 @@
+''' class for python-native routine usuing netCDF4 and numpy to crunch time-averages '''
 from .timeAverager import timeAverager
 
 class frepytoolsTimeAverager(timeAverager):
@@ -6,7 +7,6 @@ class frepytoolsTimeAverager(timeAverager):
     generates time-averages using a python-native approach
     avoids using other third party statistics functions by design.
     '''
-
 
     def generate_timavg(self, infile=None, outfile=None):
         ''' my own time-averaging function. mostly an exercise. '''

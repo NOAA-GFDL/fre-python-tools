@@ -1,3 +1,4 @@
+''' class for utilizing timavg.csh (aka script to TAVG fortran exe) in frenc-tools '''
 from .timeAverager import timeAverager
 
 class frenctoolsTimeAverager(timeAverager):
@@ -36,17 +37,17 @@ class frenctoolsTimeAverager(timeAverager):
             return exitstatus
 
         if self.unwgt:
-            print(f'WARNING: unwgt=True unsupported by frenctoolsAverager. ignoring!!!')
+            print('WARNING: unwgt=True unsupported by frenctoolsAverager. ignoring!!!')
 
         if self.stddev:
-            print(f'WARNING: stddev=True unsupported by frenctoolsTimeAverager. ignoring!!!')
+            print('WARNING: stddev=True unsupported by frenctoolsTimeAverager. ignoring!!!')
 
         if self.stddev_type is not None:
-            print(f'WARNING: stddev_type arg unsupported by frenctoolsTimeAverager. ignoring!!!')
+            print('WARNING: stddev_type arg unsupported by frenctoolsTimeAverager. ignoring!!!')
 
         # input arg checks
         if infile is None:
-            print(f'ERROR: I need an input file, specify a value for the infile argument')
+            print('ERROR: I need an input file, specify a value for the infile argument')
             return exitstatus
 
         if outfile is None:
@@ -70,4 +71,3 @@ class frenctoolsTimeAverager(timeAverager):
                 exitstatus=0
 
         return exitstatus
-''' class for utilizing timavg.csh (aka script to TAVG fortran exe) in frenc-tools '''
