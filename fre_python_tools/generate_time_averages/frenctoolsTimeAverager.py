@@ -28,24 +28,21 @@ class frenctoolsTimeAverager(timeAverager):
         if __debug__:
             print(f'calling generate_frenctools_timavg for file: {infile}')
 
-
-
         # class settings, check consistency with current class capabilities
         exitstatus=1
         if self.avg_type!='all':
-            print(f'ERROR: avg_type={avg_type} is not supported by this function at this time.')
+            print(f'ERROR: avg_type={self.avg_type} is not supported by this function at this time.')
             return exitstatus
 
         if self.unwgt:
             print('WARNING: unwgt=True unsupported by frenctoolsAverager. ignoring!!!')
 
-        if self.stddev:
-            print('WARNING: stddev=True unsupported by frenctoolsTimeAverager. ignoring!!!')
-
         if self.stddev_type is not None:
             print('WARNING: stddev_type arg unsupported by frenctoolsTimeAverager. ignoring!!!')
 
-        # input arg checks
+        if self.var is not None:
+            print(f'WARNING: variable specification (var={self.var}) not currently supported for frenctols time averaging. ignoring!')
+
         if infile is None:
             print('ERROR: I need an input file, specify a value for the infile argument')
             return exitstatus

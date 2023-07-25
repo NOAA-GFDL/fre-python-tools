@@ -2,8 +2,10 @@
 ''' tools for generating time averages from various packages '''
 import argparse
 
-def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,
-                          unwgt=False, stddev=False, stddev_type=None):
+def generate_time_average(infile=None, outfile=None,
+                          pkg=None, var=None,
+                          unwgt=False,
+                          avg_type=None, stddev_type=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
@@ -13,18 +15,21 @@ def generate_time_average(pkg=None, infile=None, outfile=None, avg_type=None,
     myavger=None
     if   pkg == 'cdo'            :
         from .cdoTimeAverager import cdoTimeAverager
-        myavger=cdoTimeAverager(pkg=pkg, avg_type=avg_type,
-                                unwgt=unwgt,stddev=stddev,stddev_type=stddev_type)
+        myavger=cdoTimeAverager(pkg = pkg, var=var,
+                                unwgt = unwgt,
+                                avg_type = avg_type, stddev_type = stddev_type)
 
     elif pkg == 'fre-nctools'    :
         from .frenctoolsTimeAverager import frenctoolsTimeAverager
-        myavger=frenctoolsTimeAverager(pkg=pkg, avg_type=avg_type,
-                                       unwgt=unwgt,stddev=stddev,stddev_type=stddev_type)
+        myavger=frenctoolsTimeAverager(pkg = pkg, var=var,
+                                       unwgt = unwgt ,
+                                       avg_type = avg_type, stddev_type = stddev_type)
 
     elif pkg == 'fre-python-tools':
         from .frepytoolsTimeAverager import frepytoolsTimeAverager
-        myavger=frepytoolsTimeAverager(pkg=pkg, avg_type=avg_type,
-                                      unwgt=unwgt,stddev=stddev,stddev_type=stddev_type)
+        myavger=frepytoolsTimeAverager(pkg = pkg, var=var,
+                                       unwgt = unwgt,
+                                       avg_type = avg_type, stddev_type = stddev_type)
 
     else :
         print('requested package unknown. exit.')
@@ -51,27 +56,31 @@ def main():
                            help='output file name',
                            type=str)
     argparser.add_argument('-p','--pkg',
-                          help='time average approach [cdo, fre-nctools, fre-python-tools]',
-                          type=str, default='cdo')
+                          help='time average approach',
+                           type=str, choices=['cdo','fre-nctools','fre-python-tools'], default='cdo')
+    argparser.add_argument('-v','--var',
+                           help='specify variable to average',
+                           type=str, default=None)
+    argparser.add_argument('-u','--unwgt',
+                           help='request unweighted statistics.',
+                           action='store_true', default=False)
     argparser.add_argument('-a','--avg-type',
-                           help='type of time average to generate [e.g. month,seas,all].\n \
+                           help='type of time average to generate. \n \
                                  currently, fre-nctools and fre-python-tools pkg options\n \
                                  do not support seasonal and monthly averaging.\n',
-                          type=str, default='all')
-    argparser.add_argument('-u','--unwgt',
-                           help='compute requested statistics with no weights.',
-                           action='store_true', default=False)
-    argparser.add_argument('-s','--stddev',
+                           type=str, choices = ['month','seas','all'], default='all') 
+    argparser.add_argument('-s','--stddev-type',
                            help='compute standard deviations for time-averages as well.',
-                           action='store_true', default=False)
-    argparser.add_argument('-st', '--stddev-type',
-                                 help='stddev type [pop, samp, meanpop, meansamp].\n \
-                                       option is ignored unless --unwgt/-u is specified. \n \
-                                       this functionality is still under construction.\n',
-                           type=str, default=None)
+                           type=str, choices=['samp','pop','samp_mean','pop_mean'], default='samp')
+#    argparser.add_argument('-st', '--stddev-type',
+#                                 help='stddev type [pop, samp, meanpop, meansamp].\n \
+#                                       option is ignored unless --unwgt/-u is specified. \n \
+#                                       this functionality is still under construction.\n',
+#                           type=str, default=None)
     cli_args = argparser.parse_args()
-    exitstatus=generate_time_average( cli_args.pkg, cli_args.inf, cli_args.outf, cli_args.avg_type ,
-                                      cli_args.unwgt, cli_args.stddev, cli_args.stddev_type)
+    exitstatus=generate_time_average( cli_args.inf, cli_args.outf,
+                                      cli_args.var, cli_args.unwgt,
+                                      cli_args.avg_type, cli_args.stddev_type)
     if exitstatus!=0:
         print(f'WARNING: exitstatus={exitstatus} != 0. Something exited poorly!')
     else:

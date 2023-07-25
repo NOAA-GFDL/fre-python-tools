@@ -19,6 +19,9 @@ class cdoTimeAverager(timeAverager):
             print('ERROR, avg_type requested unknown.')
             return 1
 
+        if self.var is not None:
+            print(f'WARNING: variable specification (var={self.var}) not currently supported for cdo time averaging. ignoring!')
+
         import cdo
         print(f'python-cdo version is {cdo.__version__}')
         from cdo import Cdo
@@ -44,7 +47,7 @@ class cdoTimeAverager(timeAverager):
                 nc_fin.close()
 
         if self.avg_type == 'all':
-            if not self.stddev:
+            if self.stddev_type is None:
                 print('time average over all time requested.')
                 if self.unwgt:
                     _cdo.timmean(input=infile, output=outfile, returnCdf=True)
@@ -58,7 +61,7 @@ class cdoTimeAverager(timeAverager):
                 print('done computing standard-deviation over all time.')
 
         elif self.avg_type == 'seas':
-            if not self.stddev:
+            if self.stddev_type is None:
                 print('seasonal time-averages requested.')
                 _cdo.yseasmean(input=infile, output=outfile, returnCdf=True)
                 print('done averaging over seasons.')
@@ -68,7 +71,8 @@ class cdoTimeAverager(timeAverager):
                 print('done averaging over seasons.')
 
         elif self.avg_type == 'month':
-            if not self.stddev:
+
+            if self.stddev_type is None:
                 print('monthly time-averages requested.')
                 _cdo.ymonmean(input=infile, output=outfile, returnCdf=True)
                 print('done averaging over months.')

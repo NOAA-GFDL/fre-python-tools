@@ -6,31 +6,31 @@ class timeAverager:
     this class must be inherited by another for functionality.
     '''
     pkg: str
-    avg_type: str
+    var: str
     unwgt: bool
-    stddev: bool
+    avg_type: str
     stddev_type: str
 
     def __init__(self): #init method 1, no inputs given
         self.pkg = "cdo"
-        self.avg_type = "all" #may also be, "fre-python-tools" or "fre-nctools"
+        self.var = None
         self.unwgt = False
-        self.stddev = False
-        self.stddev_type = "sample" #may also be, "population". only relevant if unwgt = False
-
-    def __init__(self, pkg, avg_type, unwgt,
-                 stddev, stddev_type): #init method 2, all inputs specified
+        self.avg_type = "all" #see argparser for options
+        self.stddev_type = None #see argparser for options
+                               
+    def __init__(self, pkg, var, unwgt,
+                 avg_type, stddev_type): #init method 2, all inputs specified
         self.pkg = pkg
-        self.avg_type = avg_type
+        self.var = var
         self.unwgt = unwgt
-        self.stddev = stddev
+        self.avg_type = avg_type
         self.stddev_type = stddev_type
 
     def __repr__(self):
         return f'{type(self).__name__}( pkg={self.pkg}, \
-                               avg_type={self.avg_type}, \
                                unwgt={self.unwgt}, \
-                               stddev={self.stddev}, \
+                               var={self.var}, \
+                               avg_type={self.avg_type}, \
                                stddev_type={self.stddev_type})'
 
     def generate_timavg(self, infile=None, outfile=None):

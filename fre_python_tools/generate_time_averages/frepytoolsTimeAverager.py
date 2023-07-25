@@ -13,8 +13,8 @@ class frepytoolsTimeAverager(timeAverager):
         if __debug__:
             print('calling generate_frepythontools_timavg for file: ' + infile)
 
-        if self.avg_type!='all':
-            print(f'ERROR: avg_type={self.avg_type} is not supported by this function at this time.')
+        if self.avg_type != 'all':
+            print(f'ERROR: avg_type={self.avg_type} not supported at this time.')
             return 1
 
         import math
@@ -26,17 +26,24 @@ class frepytoolsTimeAverager(timeAverager):
             print(f'INFO: input file is not netCDF4 format, is {nc_fin.file_format}')
 
 
-        nc_fin_var=infile.split('/').pop().split('.')[-2]
+        #identifying the input variable to computer statistics should involve one of two things:
+        # user input specifying to exact variable to target OR
+        # a separate routine that attempts to intelligently identify the target variable.
+        if self.var is not None:
+            nc_fin_var = self.var
+        else:
+            nc_fin_var = infile.split('/').pop().split('.')[-2]
+        
         if __debug__:
             print(f'nc_fin_var={nc_fin_var}')
 
 
         # check for the variable we're hoping is in the file
-        fin_vars=nc_fin.variables
+        fin_vars = nc_fin.variables
         for key in fin_vars:
-            if str(key)==nc_fin_var:
-                time_bnds=nc_fin['time_bnds'][:].copy()
-                key_found=True
+            if str(key) == nc_fin_var:
+                time_bnds = nc_fin['time_bnds'][:].copy()
+                key_found = True
                 break
         if not key_found:
             print('requested variable not found. exit.')
@@ -47,10 +54,10 @@ class frepytoolsTimeAverager(timeAverager):
         #is_masked = ma.is_masked(val_array)
 
         # read in sizes of specific axes
-        fin_dims =nc_fin.dimensions
-        N_time_bnds=fin_dims['time'].size
+        fin_dims = nc_fin.dimensions
+        num_time_bnds = fin_dims['time'].size
         if not self.unwgt: #compute sum of weights
-            wgts=numpy.moveaxis(time_bnds,0,-1)[1][:].copy() - numpy.moveaxis(time_bnds,0,-1)[0][:].copy()
+            wgts = numpy.moveaxis( time_bnds,0,-1)[1][:].copy() - numpy.moveaxis( time_bnds,0,-1)[0][:].copy()
             wgts_sum=sum(wgts)
             if __debug__:
                 print(f'wgts_sum={wgts_sum}')
@@ -62,48 +69,48 @@ class frepytoolsTimeAverager(timeAverager):
         lon_bnd=fin_dims['lon'].size
         print(f'lon_bnd={lon_bnd}')
         avgvals=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
-        if self.stddev:
-            print(f'computing std. deviations')
+        if self.stddev_type is not None:
+            print('computing std. deviations')
             stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
 
-        if True:
+        if True: #doing this to test metadata writing stuff quicker
             # compute average, for each lat/lon coordinate over time record in file
             if not self.unwgt: #weighted case
-                print(f'computing weighted statistics')
+                print('computing weighted statistics')
                 for lat in range(lat_bnd):
                     lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
 
                     for lon in range(lon_bnd):
                         tim_val_array= lon_val_array[lon].copy()
                         avgvals[0][lat][lon]=sum( (tim_val_array[tim] * wgts[tim] )
-                                                  for tim in range(N_time_bnds) ) / wgts_sum
+                                                  for tim in range(num_time_bnds) ) / wgts_sum
 
-                        if self.stddev: # use sample and/or estimated pop std. dev.
+                        if self.stddev_type is not None: # implement stddeviation types TO DO
                             stddevs[0][lat][lon]=math.sqrt(
                                                  sum( wgts[tim] *
-                                                      (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
-                                                      for tim in range(N_time_bnds) )
+                                                      (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2
+                                                      for tim in range(num_time_bnds) )
                                                   / wgts_sum )
                         del tim_val_array
                     del lon_val_array
             else: #unweighted case
-                print(f'computing unweighted statistics')
+                print('computing unweighted statistics')
                 for lat in range(lat_bnd):
                     lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
 
                     for lon in range(lon_bnd):
                         tim_val_array= lon_val_array[lon].copy()
                         avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
-                            tim_val_array[tim] for tim in range(N_time_bnds)
-                                   ) / N_time_bnds
+                            tim_val_array[tim] for tim in range(num_time_bnds)
+                                   ) / num_time_bnds
 
-                        if self.stddev:
+                        if self.stddev_type is not None:
 
                             stddevs[0][lat][lon]=math.sqrt(
                                                           sum(
-                                                              (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2.
-                                                              for tim in range(N_time_bnds)
-                                                          ) / ( (N_time_bnds - 1. ) )
+                                                      (tim_val_array[tim]-avgvals[0][lat][lon]) ** 2
+                                                              for tim in range(num_time_bnds)
+                                                          ) / ( (num_time_bnds - 1. ) )
                                                                )
                         del tim_val_array
                     del lon_val_array
@@ -120,7 +127,8 @@ class frepytoolsTimeAverager(timeAverager):
         try:
             nc_fout.setncatts(nc_fin.__dict__) #this copies the global attributes exactly.
         except:
-            print('could not copy attributes from input file. now trying to copy attribute-by-attribute.')
+            print('could not copy ncatts from input file. trying to copy one-by-one')
+            fin_ncattrs=nc_fin.ncattrs()
             for ncattr in fin_ncattrs:
                 print(f'\n_________\nncattr={ncattr}')
                 try:
@@ -155,7 +163,8 @@ class frepytoolsTimeAverager(timeAverager):
         unwritten_var_list=[]
         unwritten_var_ncattr_dict={}
         for var in fin_vars:
-            print(f'\nattempting to create output variable: {var}')    #nc_fout.createVariable(var, fin_vars[var].dtype, (var))
+            print(f'\nattempting to create output variable: {var}')
+            #nc_fout.createVariable(var, fin_vars[var].dtype, (var))
             nc_fout.createVariable(var, nc_fin[var].dtype, nc_fin[var].dimensions)
             nc_fout.variables[var].setncatts(nc_fin[var].__dict__)
             if var != nc_fin_var:
@@ -169,12 +178,6 @@ class frepytoolsTimeAverager(timeAverager):
         print(f'unwritten_var_ncattr_dict={unwritten_var_ncattr_dict}')
         print('---------- DONE writing output variables. ---------')
         ##
-
-
-
-
-
-
 
 
         nc_fout.close()

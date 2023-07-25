@@ -22,7 +22,7 @@ def test_monthly_cdo_time_unwgt_avgs():
         pl.Path(monthly_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=monthly_outfile, avg_type='month', unwgt=True)
+    gtas.generate_time_average(infile = infile, outfile = monthly_outfile, pkg='cdo', avg_type='month', unwgt=True)
     assert pl.Path(monthly_outfile).exists()
 
 def test_seasonal_cdo_time_unwgt_avgs():
@@ -35,7 +35,7 @@ def test_seasonal_cdo_time_unwgt_avgs():
         pl.Path(seasonal_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=seasonal_outfile, avg_type='seas', unwgt=True)
+    gtas.generate_time_average(infile = infile, outfile = seasonal_outfile, pkg='cdo', avg_type='seas', unwgt=True)
     assert pl.Path(seasonal_outfile).exists()
 
 def test_cdo_time_unwgt_avgs():
@@ -48,7 +48,7 @@ def test_cdo_time_unwgt_avgs():
         pl.Path(all_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=all_outfile, avg_type='all', unwgt=True)
+    gtas.generate_time_average(infile = infile, outfile = all_outfile, pkg='cdo', avg_type='all', unwgt=True)
     assert pl.Path(all_outfile).exists()
 
 
@@ -67,7 +67,7 @@ def test_cdo_time_avgs():
         pl.Path(all_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=all_outfile, avg_type='all', unwgt=False)
+    gtas.generate_time_average(infile = infile, outfile = all_outfile, pkg='cdo', avg_type='all', unwgt=False)
     assert pl.Path(all_outfile).exists()
 
 
@@ -82,7 +82,7 @@ def test_monthly_cdo_time_unwgt_stddevs():
         pl.Path(monthly_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=monthly_outfile, avg_type='month', stddev=True)
+    gtas.generate_time_average(infile = infile, outfile = monthly_outfile, pkg='cdo', avg_type='month', stddev_type='samp')
     assert pl.Path(monthly_outfile).exists()
 
 def test_seasonal_cdo_time_unwgt_stddevs():
@@ -95,7 +95,7 @@ def test_seasonal_cdo_time_unwgt_stddevs():
         pl.Path(seasonal_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=seasonal_outfile, avg_type='seas', stddev=True)
+    gtas.generate_time_average(infile = infile, outfile = seasonal_outfile, pkg='cdo', avg_type='seas', stddev_type='samp')
     assert pl.Path(seasonal_outfile).exists()
 
 def test_cdo_time_unwgt_stddevs():
@@ -108,7 +108,7 @@ def test_cdo_time_unwgt_stddevs():
         pl.Path(all_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='cdo', infile=infile, outfile=all_outfile, avg_type='all', stddev=True)
+    gtas.generate_time_average(infile = infile, outfile = all_outfile, pkg='cdo', avg_type='all', stddev_type='samp')
     assert pl.Path(all_outfile).exists()
 
 ### cdo stddevs, weighted, all/seasonal/monthly ------------------------
@@ -128,7 +128,7 @@ def test_fre_python_tools_time_avgs():
         pl.Path(all_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='fre-python-tools', infile=infile, outfile=all_outfile, unwgt=False, stddev=False, avg_type='all')
+    gtas.generate_time_average(infile = infile, outfile = all_outfile, pkg='fre-python-tools', unwgt=False, avg_type='all')
     assert pl.Path(all_outfile).exists()
 
 def test_fre_python_tools_time_unwgt_avgs():
@@ -142,7 +142,7 @@ def test_fre_python_tools_time_unwgt_avgs():
         pl.Path(all_unwgt_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='fre-python-tools', infile=infile, outfile=all_unwgt_outfile, unwgt=True, stddev=False, avg_type='all')
+    gtas.generate_time_average(infile = infile, outfile = all_unwgt_outfile, pkg='fre-python-tools', unwgt=True, avg_type='all')
     assert pl.Path(all_unwgt_outfile).exists()
 
 def test_fre_python_tools_time_avgs_stddevs():
@@ -156,7 +156,7 @@ def test_fre_python_tools_time_avgs_stddevs():
         pl.Path(all_stddev_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='fre-python-tools', infile=infile, outfile=all_stddev_outfile, unwgt=False, stddev=True, avg_type='all')
+    gtas.generate_time_average(infile = infile, outfile = all_stddev_outfile, pkg='fre-python-tools', unwgt=False, stddev_type='samp', avg_type='all')
     assert pl.Path(all_stddev_outfile).exists()
 
 def test_fre_python_tools_time_unwgt_avgs_stddevs():
@@ -170,7 +170,7 @@ def test_fre_python_tools_time_unwgt_avgs_stddevs():
         pl.Path(all_unwgt_stddev_outfile).unlink() #delete file so we check that it can be recreated
 
     from fre_python_tools.generate_time_averages import generate_time_averages as gtas
-    gtas.generate_time_average(pkg='fre-python-tools', infile=infile, outfile=all_unwgt_stddev_outfile, unwgt=True, stddev=True, avg_type='all')
+    gtas.generate_time_average(infile = infile, outfile = all_unwgt_stddev_outfile, pkg='fre-python-tools', unwgt=True, stddev_type='samp', avg_type='all')
     assert pl.Path(all_unwgt_stddev_outfile).exists()
 
 # TO DO: MAKE THESE
