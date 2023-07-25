@@ -9,6 +9,12 @@ def generate_time_average(infile=None, outfile=None,
     ''' steering function to various averaging functions above'''
     if __debug__:
         print(f'calling generate time averages for file: {infile}')
+        print(f'outfile: {outfile}')
+        print(f'pkg: {pkg}')
+        print(f'var: {var}')
+        print(f'unwgt: {unwgt}')
+        print(f'avg_type: {avg_type}')
+        print(f'stddev_type: {stddev_type}')
     exitstatus=1
 
     #needs a case statement
@@ -79,7 +85,8 @@ def main():
 #                           type=str, default=None)
     cli_args = argparser.parse_args()
     exitstatus=generate_time_average( cli_args.inf, cli_args.outf,
-                                      cli_args.var, cli_args.unwgt,
+                                      cli_args.pkg, cli_args.var,
+                                      cli_args.unwgt,
                                       cli_args.avg_type, cli_args.stddev_type)
     if exitstatus!=0:
         print(f'WARNING: exitstatus={exitstatus} != 0. Something exited poorly!')

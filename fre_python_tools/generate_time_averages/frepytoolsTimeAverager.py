@@ -30,18 +30,18 @@ class frepytoolsTimeAverager(timeAverager):
         # user input specifying to exact variable to target OR
         # a separate routine that attempts to intelligently identify the target variable.
         if self.var is not None:
-            nc_fin_var = self.var
+            targ_var = self.var
         else:
-            nc_fin_var = infile.split('/').pop().split('.')[-2]
+            targ_var = infile.split('/').pop().split('.')[-2]
         
         if __debug__:
-            print(f'nc_fin_var={nc_fin_var}')
+            print(f'targ_var={targ_var}')
 
 
         # check for the variable we're hoping is in the file
-        fin_vars = nc_fin.variables
-        for key in fin_vars:
-            if str(key) == nc_fin_var:
+        nc_fin_vars = nc_fin.variables
+        for key in nc_fin_vars:
+            if str(key) == targ_var:
                 time_bnds = nc_fin['time_bnds'][:].copy()
                 key_found = True
                 break
@@ -64,23 +64,23 @@ class frepytoolsTimeAverager(timeAverager):
 
 
         # initialize arrays
-        lat_bnd=fin_dims['lat'].size
-        print(f'lat_bnd={lat_bnd}')
-        lon_bnd=fin_dims['lon'].size
-        print(f'lon_bnd={lon_bnd}')
-        avgvals=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
+        num_lat_bnds=fin_dims['lat'].size
+        print(f'num_lat_bnds={num_lat_bnds}')
+        num_lon_bnds=fin_dims['lon'].size
+        print(f'num_lon_bnds={num_lon_bnds}')
+        avgvals=numpy.zeros((1,num_lat_bnds,num_lon_bnds),dtype=float)
         if self.stddev_type is not None:
             print('computing std. deviations')
-            stddevs=numpy.zeros((1,lat_bnd,lon_bnd),dtype=float)
+            stddevs=numpy.zeros((1,num_lat_bnds,num_lon_bnds),dtype=float)
 
-        if True: #doing this to test metadata writing stuff quicker
+        if False: #doing this to test metadata writing stuff quicker
             # compute average, for each lat/lon coordinate over time record in file
             if not self.unwgt: #weighted case
                 print('computing weighted statistics')
-                for lat in range(lat_bnd):
-                    lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
+                for lat in range(num_lat_bnds):
+                    lon_val_array=numpy.moveaxis( nc_fin[targ_var][:],0,-1)[lat].copy()
 
-                    for lon in range(lon_bnd):
+                    for lon in range(num_lon_bnds):
                         tim_val_array= lon_val_array[lon].copy()
                         avgvals[0][lat][lon]=sum( (tim_val_array[tim] * wgts[tim] )
                                                   for tim in range(num_time_bnds) ) / wgts_sum
@@ -95,10 +95,10 @@ class frepytoolsTimeAverager(timeAverager):
                     del lon_val_array
             else: #unweighted case
                 print('computing unweighted statistics')
-                for lat in range(lat_bnd):
-                    lon_val_array=numpy.moveaxis( nc_fin[nc_fin_var][:],0,-1)[lat].copy()
+                for lat in range(num_lat_bnds):
+                    lon_val_array=numpy.moveaxis( nc_fin[targ_var][:],0,-1)[lat].copy()
 
-                    for lon in range(lon_bnd):
+                    for lon in range(num_lon_bnds):
                         tim_val_array= lon_val_array[lon].copy()
                         avgvals[0][lat][lon]=sum( # no time sum needed here, b.c. unweighted, so sum
                             tim_val_array[tim] for tim in range(num_time_bnds)
@@ -147,7 +147,8 @@ class frepytoolsTimeAverager(timeAverager):
         for key in fin_dims:
             try:
                 if key=='time':
-                    nc_fout.createDimension( dimname=key, size=None )
+                    #nc_fout.createDimension( dimname=key, size=None )
+                    nc_fout.createDimension( dimname=key, size=1)
                 else:
                     nc_fout.createDimension( dimname=key, size=fin_dims[key].size )
             except:
@@ -158,19 +159,41 @@ class frepytoolsTimeAverager(timeAverager):
         print('------ DONE writing output dimensions. ------- \n')
         ##
 
-        # write output variables (aka data) #prev code.
-        print('\n------- writing output variables. -------- ')
+        
+        # first write the data we care most about- those we computed.
+        nc_fout.createVariable(targ_var, nc_fin[targ_var].dtype, nc_fin[targ_var].dimensions)
+        nc_fout.variables[targ_var].setncatts(nc_fin[targ_var].__dict__)
+        nc_fout.variables[targ_var][:]=avgvals
+        if self.stddev_type is not None:
+            stddev_varname=targ_var+'_'+self.stddev_type+'_stddev'
+            nc_fout.createVariable(stddev_varname, nc_fin[targ_var].dtype, nc_fin[targ_var].dimensions)
+            nc_fout.variables[stddev_varname].setncatts(nc_fin[targ_var].__dict__)
+            nc_fout.variables[stddev_varname][:]=stddevs
+        ##    
+
+
+
+        # write OTHER output variables (aka data) #prev code.
+        print('\n------- writing other output variables. -------- ')
         unwritten_var_list=[]
         unwritten_var_ncattr_dict={}
-        for var in fin_vars:
-            print(f'\nattempting to create output variable: {var}')
-            #nc_fout.createVariable(var, fin_vars[var].dtype, (var))
-            nc_fout.createVariable(var, nc_fin[var].dtype, nc_fin[var].dimensions)
-            nc_fout.variables[var].setncatts(nc_fin[var].__dict__)
-            if var != nc_fin_var:
-                nc_fout.variables[var][:] = nc_fin[var][:].copy()
+        for var in nc_fin_vars:
+            if var != targ_var:
+                print(f'\nattempting to create output variable: {var}')
+                #print(f'is it a time variable? {self.var_is_time(nc_fin.variables[var])}')
+                nc_fout.createVariable(var, nc_fin[var].dtype, nc_fin[var].dimensions)
+                nc_fout.variables[var].setncatts(nc_fin[var].__dict__)
+                try:
+                    nc_fout.variables[var][:] = nc_fin[var][:]
+                except:
+                    print(f'could not write var={var}. i bet its the shape!')
+                    print(f'nc_fin[var].shape={nc_fin[var].shape}')
+                    #print(f'len(nc_fout.variables[{var}])={len(nc_fout.variables[var])}')
+                    nc_fout.variables[var][:] = [ nc_fin[var][0] ]
+                    print(f'is it a time variable? {self.var_has_time_units(nc_fin.variables[var])}')
             else:
-                nc_fout.variables[var][:] = avgvals
+                continue
+
 
 
         if len(unwritten_var_list)>0:
