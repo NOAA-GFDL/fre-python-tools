@@ -53,7 +53,10 @@ class frepytoolsTimeAverager(timeAverager):
         # check for mask, adjust accordingly TO DO
         #is_masked = ma.is_masked(val_array)
 
-        # read in sizes of specific axes
+        # read in sizes of specific axes / compute weights
+        # weights can be encoded as a class member, whose existence
+        # depends on the user specifying unwgt=True, if vect_wgts=None, set the avg
+        # and stddev gen functions to the appropriate behavior TO DO
         fin_dims = nc_fin.dimensions
         num_time_bnds = fin_dims['time'].size
         if not self.unwgt: #compute sum of weights
@@ -73,7 +76,13 @@ class frepytoolsTimeAverager(timeAverager):
             print('computing std. deviations')
             stddevs=numpy.zeros((1,num_lat_bnds,num_lon_bnds),dtype=float)
 
-        if False: #doing this to test metadata writing stuff quicker
+        # this loop behavior 100% should be re-factored into generator functions.
+        # they should be slightly faster, and much more readable. TO DO
+        # the average/stddev cpu settings should also be genfunctions, their behavior
+        # (e.g. stddev_pop v stddev_samp) should be set given user inputs. TO DO
+        # the computations can lean on numpy.stat more- i imagine it's faster TO DO
+        # parallelism via a module like dask should come after the above improvements TO DO
+        if True: #doing this to test metadata writing stuff quicker
             # compute average, for each lat/lon coordinate over time record in file
             if not self.unwgt: #weighted case
                 print('computing weighted statistics')
@@ -115,7 +124,13 @@ class frepytoolsTimeAverager(timeAverager):
                         del tim_val_array
                     del lon_val_array
 
+
+
         # write output file
+        # the first pass at this is mediocre
+        # i think this is also a class function
+        # sep out and work with elsewhere TO DO
+        # tests for these functions? TO DO
         #with Dataset( outfile, 'w', format='NETCDF4', persist=True ) as nc_fout:
         #nc_fout= Dataset( outfile, 'w', format='NETCDF4', persist=True )
         nc_fout= Dataset( outfile, 'w', format=nc_fin.file_format, persist=True )
@@ -162,7 +177,9 @@ class frepytoolsTimeAverager(timeAverager):
         
         # first write the data we care most about- those we computed.
         nc_fout.createVariable(targ_var, nc_fin[targ_var].dtype, nc_fin[targ_var].dimensions)
-        nc_fout.variables[targ_var].setncatts(nc_fin[targ_var].__dict__)
+        nc_fout.variables[targ_var].setncatts(nc_fin[targ_var].__dict__) # copying metadata, not fully correct 
+                                                                         # but not far from wrong according to CF
+                                                                         # cell_methods must be changed TO DO
         nc_fout.variables[targ_var][:]=avgvals
         if self.stddev_type is not None:
             stddev_varname=targ_var+'_'+self.stddev_type+'_stddev'
@@ -170,8 +187,6 @@ class frepytoolsTimeAverager(timeAverager):
             nc_fout.variables[stddev_varname].setncatts(nc_fin[targ_var].__dict__)
             nc_fout.variables[stddev_varname][:]=stddevs
         ##    
-
-
 
         # write OTHER output variables (aka data) #prev code.
         print('\n------- writing other output variables. -------- ')
