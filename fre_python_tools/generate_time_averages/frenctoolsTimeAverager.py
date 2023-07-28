@@ -6,22 +6,6 @@ class frenctoolsTimeAverager(timeAverager):
     class inheriting from abstract base class timeAverager
     generates time-averages using fre-nctools
     '''
-    #assert(self.pkg=='fre-nctools)' #don't do this, use property decorator.
-                                     #see 7.17 in python distilled.
-                                     #maybe put in base class?
-    #@property
-    #def pkg(self):
-    #return self._pkg
-
-#    def just_say_hello():             #error: takes 0 positional arguments but 1 was given
-#        print('HELLOOOOO CLASSES!!!!')# b.c. self is passed as an arg automatically.
-#
-#    def just_say_hello(self): #self is req'd as an arg here. b.c. it always get's passed, unless...
-#        print('HELLOOOOO CLASSES!!!!')
-#
-#    @staticmethod # you use a static method signified, so self isn't passed as an arg automatically
-#    def just_say_hello2():
-#        print('(static) HELLOOOOO CLASSES!!!!')
 
     def generate_timavg(self, infile=None, outfile=None):
         ''' use fre-nctool's CLI timavg.csh with subprocess call '''
