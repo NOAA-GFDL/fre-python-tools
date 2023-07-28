@@ -21,10 +21,10 @@ if [ -f $TESFILE ] ; then
 	echo "target input file="
 	echo "$TESTFILE"
 
-#	echo ""
-#	echo "--------------------------------------------------"	
-#	echo "running cdo timavg examples"	
-#	cdo_timavg_exs
+	echo ""
+	echo "--------------------------------------------------"	
+	echo "running cdo timavg examples"	
+	cdo_timavg_exs
 	
 	echo ""
 	echo "--------------------------------------------------"	
