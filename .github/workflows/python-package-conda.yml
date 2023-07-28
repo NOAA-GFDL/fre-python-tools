@@ -1,6 +1,6 @@
 name: Python Package using Conda
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build-linux:
@@ -21,10 +21,8 @@ jobs:
     - name: build environment
       run: |
         conda env update --file environment.yml --name base
-        conda list
-        pwd
-        ls
         pip install .
+        conda list
     - name: pytest
       run: |
         pytest
