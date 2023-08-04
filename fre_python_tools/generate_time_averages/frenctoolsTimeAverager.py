@@ -9,10 +9,10 @@ class frenctoolsTimeAverager(timeAverager):
 
     def generate_timavg(self, infile=None, outfile=None):
         ''' use fre-nctool's CLI timavg.csh with subprocess call '''
+        assert (self.pkg=="fre-nctools")
         if __debug__:
-            print(f'calling generate_frenctools_timavg for file: {infile}')
-
-        # class settings, check consistency with current class capabilities
+            print(locals()) #input argument details
+        
         exitstatus=1
         if self.avg_type!='all':
             print(f'ERROR: avg_type={self.avg_type} is not supported by this function at this time.')

@@ -8,12 +8,11 @@ class cdoTimeAverager(timeAverager):
     '''
 
     def generate_timavg(self, infile=None, outfile=None):
+        ''' use cdo package routines via python bindings '''
+        assert (self.pkg=="cdo")        
         if __debug__:
-            print(f'calling generate_cdo_timavg for file: {infile}')
-            print(f'outfile={outfile}')
-            print(f'stddev_type={self.stddev_type}')
-            print(f'avg_type={self.avg_type}')
-
+            print(locals()) #input argument details
+            
         if all([self.avg_type!='all',self.avg_type!='seas',self.avg_type!='month',
                 self.avg_type is not None]):
             print('ERROR, avg_type requested unknown.')
@@ -28,23 +27,18 @@ class cdoTimeAverager(timeAverager):
 
         _cdo=Cdo()
 
-        #num_time_bnds=-1
         wgts_sum=0
         if not self.unwgt: #weighted case, cdo ops alone don't support a weighted time-average.
             from netCDF4 import Dataset
             import numpy
 
             nc_fin = Dataset(infile, 'r')
-            time_bnds=nc_fin['time_bnds'][:].copy()
-            #num_time_bnds=len(time_bnds)
 
+            time_bnds=nc_fin['time_bnds'][:].copy()
             wgts=numpy.moveaxis(time_bnds,0,-1)[1][:].copy() - numpy.moveaxis(time_bnds,0,-1)[0][:].copy()
             wgts_sum=sum(wgts)
-
             if __debug__:
                 print(f'wgts_sum={wgts_sum}')
-
-                nc_fin.close()
 
         if self.avg_type == 'all':
             if self.stddev_type is None:

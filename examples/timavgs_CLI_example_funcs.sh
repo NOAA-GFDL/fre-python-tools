@@ -72,8 +72,8 @@ function cdo_timavg_exs(){ #all of these are unweighted. extra steps required fo
 }
 
 function fre_nctools_timavg_exs(){
-	#if you already have fre-nctools, this step is unnecessary
-	module load fre-nctools
+	##if you do not already have fre-nctools, a step like this is necessary
+	#module load fre-nctools
 
 	outfile=$TESTFILE_DIR/fre_nctools_timavg_CLI_test_r8_mb_${PP_COMP}_${VAR}_1979_5y.nc
 	if [ -f $outfile ] ; then rm -f $outfile ; fi

@@ -4,20 +4,13 @@ import argparse
 
 def generate_time_average(infile=None, outfile=None,
                           pkg=None, var=None,
-                          unwgt=False,
-                          avg_type=None, stddev_type=None):
+                          unwgt=False, avg_type=None, stddev_type=None):
     ''' steering function to various averaging functions above'''
     if __debug__:
-        print(f'calling generate time averages for file: {infile}')
-        print(f'outfile: {outfile}')
-        print(f'pkg: {pkg}')
-        print(f'var: {var}')
-        print(f'unwgt: {unwgt}')
-        print(f'avg_type: {avg_type}')
-        print(f'stddev_type: {stddev_type}')
+        print(locals()) #input argument details
     exitstatus=1
 
-    #needs a case statement
+    #needs a case statement. better yet, smarter way to do this? (TODO)
     myavger=None
     if   pkg == 'cdo'            :
         from .cdoTimeAverager import cdoTimeAverager
@@ -33,8 +26,8 @@ def generate_time_average(infile=None, outfile=None,
 
     elif pkg == 'fre-python-tools':
         from .frepytoolsTimeAverager import frepytoolsTimeAverager
-        myavger=frepytoolsTimeAverager(pkg = pkg, var=var,
-                                       unwgt = unwgt,
+        myavger=frepytoolsTimeAverager(pkg = pkg, var=var,                           
+                                       unwgt = unwgt,                                
                                        avg_type = avg_type, stddev_type = stddev_type)
 
     else :
@@ -78,11 +71,12 @@ def main():
     argparser.add_argument('-s','--stddev-type',
                            help='compute standard deviations for time-averages as well.',
                            type=str, choices=['samp','pop','samp_mean','pop_mean'], default='samp')
-#    argparser.add_argument('-st', '--stddev-type',
-#                                 help='stddev type [pop, samp, meanpop, meansamp].\n \
-#                                       option is ignored unless --unwgt/-u is specified. \n \
-#                                       this functionality is still under construction.\n',
-#                           type=str, default=None)
+    # this kind of CLI functionality should be easy to add (TODO)
+    #    argparser.add_argument('-st', '--stddev-type', 
+    #                                 help='stddev type [pop, samp, meanpop, meansamp].\n \
+    #                                       option is ignored unless --unwgt/-u is specified. \n \
+    #                                       this functionality is still under construction.\n',
+    #                           type=str, default=None)
     cli_args = argparser.parse_args()
     exitstatus=generate_time_average( cli_args.inf, cli_args.outf,
                                       cli_args.pkg, cli_args.var,
@@ -97,5 +91,4 @@ if __name__ == '__main__':
     import time
     start_time=time.perf_counter()
     main()
-    finish_time=time.perf_counter()
-    print(f'Finished in total time {round(finish_time - start_time , 2)} second(s)')
+    print(f'Finished in total time {round(time.perf_counter() - start_time , 2)} second(s)')

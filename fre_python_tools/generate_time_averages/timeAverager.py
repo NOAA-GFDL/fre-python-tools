@@ -12,7 +12,7 @@ class timeAverager:
     stddev_type: str
 
     def __init__(self): #init method 1, no inputs given
-        self.pkg = "cdo"
+        self.pkg = None
         self.var = None
         self.unwgt = False
         self.avg_type = "all" #see argparser for options
