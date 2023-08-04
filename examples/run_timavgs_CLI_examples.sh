@@ -20,14 +20,16 @@ if [ -f $TESFILE ] ; then
 	echo "--------------------------------------------------"	
 	echo "target input file="
 	echo "$TESTFILE"
+
 	echo ""
 	echo "--------------------------------------------------"	
 	echo "running cdo timavg examples"	
-	cdo_timmean_ex
+	cdo_timavg_exs
+	
 	echo ""
 	echo "--------------------------------------------------"	
 	echo "running fre-nctools timavg examples"	
-	fre_nctools_timavg_ex
+	fre_nctools_timavg_exs
 
 	return 0
 else
