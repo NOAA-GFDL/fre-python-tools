@@ -13,7 +13,7 @@ class frepytoolsTimeAverager(timeAverager):
         assert(self.pkg=="fre-python-tools")
         if __debug__:
             print(locals()) #input argument details
-        
+
         if __debug__:
             print('calling generate_frepythontools_timavg for file: ' + infile)
 
@@ -38,7 +38,7 @@ class frepytoolsTimeAverager(timeAverager):
             targ_var = self.var
         else:
             targ_var = infile.split('/').pop().split('.')[-2] # this can be replaced w/ a regex search maybe
-        
+
         if __debug__:
             print(f'targ_var={targ_var}')
 
@@ -56,7 +56,7 @@ class frepytoolsTimeAverager(timeAverager):
 
 
         # (TODO) determine what we need to worry about with masks and account for it
-        # check for mask, adjust accordingly 
+        # check for mask, adjust accordingly
         #is_masked = ma.is_masked(val_array)
 
         # (TODO) make this a sep function, make tests, extend
@@ -166,7 +166,7 @@ class frepytoolsTimeAverager(timeAverager):
         unwritten_dims_list=[]
         for key in fin_dims:
             try:
-                if key=='time': # this strongly influences the final data structure shape of the averages. 
+                if key=='time': # this strongly influences the final data structure shape of the averages.
                     #nc_fout.createDimension( dimname=key, size=None ) # if set to None, and lets say you try to write
                     #                                                  # e.g. the original 'time_bnds' (which has 60 time steps)
                     #                                                  # the array holding the avg. value will suddently have 60 time steps
@@ -187,7 +187,7 @@ class frepytoolsTimeAverager(timeAverager):
         # first write the data we care most about- those we computed
         print(f'\n------- writing data for data {targ_var} -------- ')
         nc_fout.createVariable(targ_var, nc_fin[targ_var].dtype, nc_fin[targ_var].dimensions)
-        nc_fout.variables[targ_var].setncatts(nc_fin[targ_var].__dict__) # copying metadata, not fully correct 
+        nc_fout.variables[targ_var].setncatts(nc_fin[targ_var].__dict__) # copying metadata, not fully correct
                                                                          # but not far from wrong according to CF
                                                                          # cell_methods must be changed TO DO
         nc_fout.variables[targ_var][:]=avgvals
@@ -197,7 +197,7 @@ class frepytoolsTimeAverager(timeAverager):
             nc_fout.variables[stddev_varname].setncatts(nc_fin[targ_var].__dict__)
             nc_fout.variables[stddev_varname][:]=stddevs
         print('---------- DONE writing output variables. ---------')
-        ##    
+        ##
 
         # (TODO) make this a sep function, make tests, extend
         # write OTHER output variables (aka data) #prev code.

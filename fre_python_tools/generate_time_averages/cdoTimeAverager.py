@@ -9,10 +9,10 @@ class cdoTimeAverager(timeAverager):
 
     def generate_timavg(self, infile=None, outfile=None):
         ''' use cdo package routines via python bindings '''
-        assert (self.pkg=="cdo")        
+        assert (self.pkg=="cdo")
         if __debug__:
             print(locals()) #input argument details
-            
+
         if all([self.avg_type!='all',self.avg_type!='seas',self.avg_type!='month',
                 self.avg_type is not None]):
             print('ERROR, avg_type requested unknown.')

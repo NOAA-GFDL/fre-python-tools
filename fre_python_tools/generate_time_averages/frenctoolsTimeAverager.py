@@ -12,7 +12,7 @@ class frenctoolsTimeAverager(timeAverager):
         assert (self.pkg=="fre-nctools")
         if __debug__:
             print(locals()) #input argument details
-        
+
         exitstatus=1
         if self.avg_type!='all':
             print(f'ERROR: avg_type={self.avg_type} is not supported by this function at this time.')

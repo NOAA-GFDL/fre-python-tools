@@ -17,7 +17,7 @@ class timeAverager:
         self.unwgt = False
         self.avg_type = "all" #see argparser for options
         self.stddev_type = None #see argparser for options
-                               
+
     def __init__(self, pkg, var, unwgt,
                  avg_type, stddev_type): #init method 2, all inputs specified
         self.pkg = pkg
@@ -36,7 +36,7 @@ class timeAverager:
     def var_has_time_units(self, an_nc_var=None):
         try:
             var_units=an_nc_var.units
-            units_is_time = False        
+            units_is_time = False
             units_is_time = any( [ var_units == 'seconds' ,  'seconds since' in var_units ,
                                    var_units == 'minutes' ,  'minutes since' in var_units ,
                                    var_units == 'hours'   ,  'hours since'   in var_units ,
@@ -54,8 +54,8 @@ class timeAverager:
         #    var_dims=an_nc_var.dimensions
         #for dim in an_nc_var.dimensions:
         #    if dim ==
-        
-        
+
+
 
 
     def generate_timavg(self, infile=None, outfile=None):

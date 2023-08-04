@@ -26,8 +26,8 @@ def generate_time_average(infile=None, outfile=None,
 
     elif pkg == 'fre-python-tools':
         from .frepytoolsTimeAverager import frepytoolsTimeAverager
-        myavger=frepytoolsTimeAverager(pkg = pkg, var=var,                           
-                                       unwgt = unwgt,                                
+        myavger=frepytoolsTimeAverager(pkg = pkg, var=var,
+                                       unwgt = unwgt,
                                        avg_type = avg_type, stddev_type = stddev_type)
 
     else :
@@ -67,12 +67,12 @@ def main():
                            help='type of time average to generate. \n \
                                  currently, fre-nctools and fre-python-tools pkg options\n \
                                  do not support seasonal and monthly averaging.\n',
-                           type=str, choices = ['month','seas','all'], default='all') 
+                           type=str, choices = ['month','seas','all'], default='all')
     argparser.add_argument('-s','--stddev-type',
                            help='compute standard deviations for time-averages as well.',
                            type=str, choices=['samp','pop','samp_mean','pop_mean'], default='samp')
     # this kind of CLI functionality should be easy to add (TODO)
-    #    argparser.add_argument('-st', '--stddev-type', 
+    #    argparser.add_argument('-st', '--stddev-type',
     #                                 help='stddev type [pop, samp, meanpop, meansamp].\n \
     #                                       option is ignored unless --unwgt/-u is specified. \n \
     #                                       this functionality is still under construction.\n',
